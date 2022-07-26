@@ -5,6 +5,7 @@
   "deno.lint": true,
   "deno.importMap": "./import_map.json",
   "deno.config": "./deno.jsonc",
+  "deno.internalDebug": true,
 
   "customLocalFormatters.formatters": [
     {
@@ -49,12 +50,16 @@
   "[typescriptreact]": {
     "editor.defaultFormatter": "jkillian.custom-local-formatters"
   },
-
-
+  "editor.unicodeHighlight.allowedCharacters": {
+    "¬": true,
+    "∧": true,
+    "∨": true,
+    "→": true
+  },
   "json.schemas": [
     {
       "fileMatch": ["deno.jsonc"],
       "url": "https://deno.land/x/deno/cli/schemas/config-file.v1.json"
     }
-  ],
+  ]
 }
