@@ -7,6 +7,10 @@ type FormulaPart =
   | { type: "OR"; left: FormulaPart; right: FormulaPart }
   | { type: "IMPLICT"; left: FormulaPart; right: FormulaPart };
 
+type TransformResult =
+  | { transformed: true; to: FormulaPart }
+  | { transformed: false };
+
 const formula: FormulaPart = {
   type: "NOT",
   include: {
@@ -16,15 +20,18 @@ const formula: FormulaPart = {
 };
 
 // !!P = P
-const notnot = (f: FormulaPart): FormulaPart => {
-  if (f.type === "NOT" && f.include.type === "NOT") return f.include.include;
-  return f;
+const notnot = (f: FormulaPart): TransformResult => {
+  if (f.type === "NOT" && f.include.type === "NOT") return { transformed: true, to: f.include.include };
+  return { transformed: false };
 };
 
 Deno.test("propositional:notnot:1", () => {
   // !!P = P
   const actual = notnot({ type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "P" } } });
-  const expected: FormulaPart = { type: "PROP", id: "P" };
+  const expected: TransformResult = {
+    transformed: true,
+    to: { type: "PROP", id: "P" },
+  };
   assertEquals(
     actual,
     expected,
@@ -34,7 +41,7 @@ Deno.test("propositional:notnot:1", () => {
 Deno.test("propositional:notnot:2", () => {
   // !P nothing change
   const actual = notnot({ type: "NOT", include: { type: "PROP", id: "P" } });
-  const expected: FormulaPart = { type: "NOT", include: { type: "PROP", id: "P" } };
+  const expected: TransformResult = { transformed: false };
   assertEquals(
     actual,
     expected,
@@ -42,9 +49,11 @@ Deno.test("propositional:notnot:2", () => {
 });
 
 // P -> Q = !P || Q
-const convertImplict = (f: FormulaPart): FormulaPart => {
-  if (f.type === "IMPLICT") return { type: "OR", left: { type: "NOT", include: f.left }, right: f.right };
-  return f;
+const convertImplict = (f: FormulaPart): TransformResult => {
+  if (f.type === "IMPLICT") {
+    return { transformed: true, to: { type: "OR", left: { type: "NOT", include: f.left }, right: f.right } };
+  }
+  return { transformed: false };
 };
 
 Deno.test("propositional:convertImplict:1", () => {
@@ -54,10 +63,13 @@ Deno.test("propositional:convertImplict:1", () => {
     left: { type: "PROP", id: "P" },
     right: { type: "PROP", id: "Q" },
   });
-  const expected: FormulaPart = {
-    type: "OR",
-    left: { type: "NOT", include: { type: "PROP", id: "P" } },
-    right: { type: "PROP", id: "Q" },
+  const expected: TransformResult = {
+    transformed: true,
+    to: {
+      type: "OR",
+      left: { type: "NOT", include: { type: "PROP", id: "P" } },
+      right: { type: "PROP", id: "Q" },
+    },
   };
   assertEquals(
     actual,
@@ -66,15 +78,18 @@ Deno.test("propositional:convertImplict:1", () => {
 });
 
 // !(P && Q) = !P || !Q
-const expandNotOr = (f: FormulaPart): FormulaPart => {
+const expandNotOr = (f: FormulaPart): TransformResult => {
   if (f.type === "NOT" && f.include.type === "AND") {
     return {
-      type: "OR",
-      left: { type: "NOT", include: f.include.left },
-      right: { type: "NOT", include: f.include.right },
+      transformed: true,
+      to: {
+        type: "OR",
+        left: { type: "NOT", include: f.include.left },
+        right: { type: "NOT", include: f.include.right },
+      },
     };
   }
-  return f;
+  return { transformed: false };
 };
 Deno.test("propositional:expandNotOr:1", () => {
   // !(P && Q) = !P || !Q
@@ -86,10 +101,13 @@ Deno.test("propositional:expandNotOr:1", () => {
       right: { type: "PROP", id: "Q" },
     },
   });
-  const expected: FormulaPart = {
-    type: "OR",
-    left: { type: "NOT", include: { type: "PROP", id: "P" } },
-    right: { type: "NOT", include: { type: "PROP", id: "Q" } },
+  const expected: TransformResult = {
+    transformed: true,
+    to: {
+      type: "OR",
+      left: { type: "NOT", include: { type: "PROP", id: "P" } },
+      right: { type: "NOT", include: { type: "PROP", id: "Q" } },
+    },
   };
   assertEquals(
     actual,
@@ -98,15 +116,18 @@ Deno.test("propositional:expandNotOr:1", () => {
 });
 
 // !(P || Q) = !P && !Q
-const expandNotAnd = (f: FormulaPart): FormulaPart => {
+const expandNotAnd = (f: FormulaPart): TransformResult => {
   if (f.type === "NOT" && f.include.type === "OR") {
     return {
-      type: "AND",
-      left: { type: "NOT", include: f.include.left },
-      right: { type: "NOT", include: f.include.right },
+      transformed: true,
+      to: {
+        type: "AND",
+        left: { type: "NOT", include: f.include.left },
+        right: { type: "NOT", include: f.include.right },
+      },
     };
   }
-  return f;
+  return { transformed: false };
 };
 Deno.test("propositional:expandNotAnd:1", () => {
   // !(P || Q) = !P && !Q
@@ -118,10 +139,13 @@ Deno.test("propositional:expandNotAnd:1", () => {
       right: { type: "PROP", id: "Q" },
     },
   });
-  const expected: FormulaPart = {
-    type: "AND",
-    left: { type: "NOT", include: { type: "PROP", id: "P" } },
-    right: { type: "NOT", include: { type: "PROP", id: "Q" } },
+  const expected: TransformResult = {
+    transformed: true,
+    to: {
+      type: "AND",
+      left: { type: "NOT", include: { type: "PROP", id: "P" } },
+      right: { type: "NOT", include: { type: "PROP", id: "Q" } },
+    },
   };
   assertEquals(
     actual,
