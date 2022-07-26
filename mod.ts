@@ -11,14 +11,6 @@ type TransformResult =
   | { transformed: true; to: FormulaPart }
   | { transformed: false };
 
-const formula: FormulaPart = {
-  type: "NOT",
-  include: {
-    type: "PROP",
-    id: "P",
-  },
-};
-
 // !!P = P
 const notnot = (f: FormulaPart): TransformResult => {
   if (f.type === "NOT" && f.include.type === "NOT") return { transformed: true, to: f.include.include };
@@ -152,3 +144,109 @@ Deno.test("propositional:expandNotAnd:1", () => {
     expected,
   );
 });
+
+const show = (f: FormulaPart): string => {
+  switch (f.type) {
+    case "PROP":
+      return f.id;
+    case "NOT":
+      return `¬${show(f.include)}`;
+    case "AND":
+      return `(${show(f.left)}∧${show(f.right)})`;
+    case "OR":
+      return `(${show(f.left)}∨${show(f.right)})`;
+    case "IMPLICT":
+      return `(${show(f.left)}→${show(f.right)})`;
+  }
+};
+
+type TransformStep =
+  | { type: "SERIAL"; formula: FormulaPart }
+  | { type: "PARARELL"; leftF: TransformStep[]; rightF: TransformStep[] };
+const step = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
+  const nn = notnot(f);
+  if (nn.transformed) {
+    return step(nn.to, [
+      ...steps,
+      { type: "SERIAL", formula: f },
+    ]);
+  }
+  const exImpl = convertImplict(f);
+  if (exImpl.transformed) {
+    return step(exImpl.to, [
+      ...steps,
+      { type: "SERIAL", formula: f },
+    ]);
+  }
+
+  const exnotand = expandNotAnd(f);
+  if (exnotand.transformed) {
+    return step(exnotand.to, [
+      ...steps,
+      { type: "SERIAL", formula: f },
+    ]);
+  }
+
+  const exnotor = expandNotOr(f);
+  if (exnotor.transformed) {
+    return step(exnotor.to, [
+      ...steps,
+      { type: "SERIAL", formula: f },
+    ]);
+  }
+
+  switch (f.type) {
+    case "AND":
+    case "OR":
+    case "IMPLICT":
+      return [
+        ...steps,
+        {
+          type: "SERIAL",
+          formula: f,
+        },
+        {
+          type: "PARARELL",
+          leftF: step(f.left, []),
+          rightF: step(f.right, []),
+        },
+      ];
+    default:
+      return [
+        ...steps,
+        { type: "SERIAL", formula: f },
+      ];
+  }
+};
+
+const formula: FormulaPart = {
+  type: "IMPLICT",
+  left: {
+    type: "NOT",
+    include: {
+      type: "AND",
+      left: { type: "NOT", include: { type: "PROP", id: "P" } },
+      right: { type: "PROP", id: "Q" },
+    },
+  },
+  right: { type: "PROP", id: "Q" },
+};
+
+const showSerial = (steps: TransformStep[], nest: number) => {
+  steps.forEach((step, i) => {
+    switch (step.type) {
+      case "SERIAL":
+        console.log([
+          "│".repeat(nest),
+          steps.length === 1 ? "└" : "├",
+          `${nest + 1}-${i + 1}: ${show(step.formula)}`,
+        ].join(""));
+        break;
+      case "PARARELL":
+        showSerial(step.leftF, nest + 1);
+        showSerial(step.rightF, nest + 1);
+        break;
+    }
+  });
+};
+showSerial(step(formula, []), 0);
