@@ -145,6 +145,21 @@ Deno.test("propositional:expandNotAnd:1", () => {
   );
 });
 
+// !(P -> Q) = P && !Q
+const expandNotImplict = (f: FormulaPart): TransformResult => {
+  if (f.type === "NOT" && f.include.type === "IMPLICT") {
+    return {
+      transformed: true,
+      to: {
+        type: "AND",
+        left: { type: "NOT", include: f.include.left },
+        right: f.include.right,
+      },
+    };
+  }
+  return { transformed: false };
+};
+
 const show = (f: FormulaPart): string => {
   switch (f.type) {
     case "PROP":
@@ -194,6 +209,13 @@ const step = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
       { type: "SERIAL", formula: f },
     ]);
   }
+  const exnotimpl = expandNotImplict(f);
+  if (exnotimpl.transformed) {
+    return step(exnotimpl.to, [
+      ...steps,
+      { type: "SERIAL", formula: f },
+    ]);
+  }
 
   switch (f.type) {
     case "AND":
@@ -219,13 +241,15 @@ const step = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
   }
 };
 
+// (P /\ (P -> Q)) -> Q
 const formula: FormulaPart = {
   type: "IMPLICT",
   left: {
-    type: "NOT",
-    include: {
-      type: "AND",
-      left: { type: "NOT", include: { type: "PROP", id: "P" } },
+    type: "AND",
+    left: { type: "PROP", id: "P" },
+    right: {
+      type: "IMPLICT",
+      left: { type: "PROP", id: "P" },
       right: { type: "PROP", id: "Q" },
     },
   },
