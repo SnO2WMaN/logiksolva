@@ -15,6 +15,7 @@ const formula: FormulaPart = {
   },
 };
 
+// !!P = P
 const notnot = (f: FormulaPart): FormulaPart => {
   if (f.type === "NOT" && f.include.type === "NOT") return f.include.include;
   return f;
@@ -40,6 +41,7 @@ Deno.test("propositional:notnot:2", () => {
   );
 });
 
+// P -> Q = !P || Q
 const convertImplict = (f: FormulaPart): FormulaPart => {
   if (f.type === "IMPLICT") return { type: "OR", left: { type: "NOT", include: f.left }, right: f.right };
   return f;
@@ -56,6 +58,70 @@ Deno.test("propositional:convertImplict:1", () => {
     type: "OR",
     left: { type: "NOT", include: { type: "PROP", id: "P" } },
     right: { type: "PROP", id: "Q" },
+  };
+  assertEquals(
+    actual,
+    expected,
+  );
+});
+
+// !(P && Q) = !P || !Q
+const expandNotOr = (f: FormulaPart): FormulaPart => {
+  if (f.type === "NOT" && f.include.type === "AND") {
+    return {
+      type: "OR",
+      left: { type: "NOT", include: f.include.left },
+      right: { type: "NOT", include: f.include.right },
+    };
+  }
+  return f;
+};
+Deno.test("propositional:expandNotOr:1", () => {
+  // !(P && Q) = !P || !Q
+  const actual = expandNotOr({
+    type: "NOT",
+    include: {
+      type: "AND",
+      left: { type: "PROP", id: "P" },
+      right: { type: "PROP", id: "Q" },
+    },
+  });
+  const expected: FormulaPart = {
+    type: "OR",
+    left: { type: "NOT", include: { type: "PROP", id: "P" } },
+    right: { type: "NOT", include: { type: "PROP", id: "Q" } },
+  };
+  assertEquals(
+    actual,
+    expected,
+  );
+});
+
+// !(P || Q) = !P && !Q
+const expandNotAnd = (f: FormulaPart): FormulaPart => {
+  if (f.type === "NOT" && f.include.type === "OR") {
+    return {
+      type: "AND",
+      left: { type: "NOT", include: f.include.left },
+      right: { type: "NOT", include: f.include.right },
+    };
+  }
+  return f;
+};
+Deno.test("propositional:expandNotAnd:1", () => {
+  // !(P || Q) = !P && !Q
+  const actual = expandNotAnd({
+    type: "NOT",
+    include: {
+      type: "OR",
+      left: { type: "PROP", id: "P" },
+      right: { type: "PROP", id: "Q" },
+    },
+  });
+  const expected: FormulaPart = {
+    type: "AND",
+    left: { type: "NOT", include: { type: "PROP", id: "P" } },
+    right: { type: "NOT", include: { type: "PROP", id: "Q" } },
   };
   assertEquals(
     actual,
