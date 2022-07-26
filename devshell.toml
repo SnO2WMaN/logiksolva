@@ -1,0 +1,6 @@
+[devshell]
+packages = ["alejandra", "deno", "taplo-cli"]
+
+[[commands]]
+package = "treefmt"
+category = "formatter"
