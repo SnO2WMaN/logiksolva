@@ -15,7 +15,7 @@ const formula: FormulaPart = {
   },
 };
 
-const notnot = (f: FormulaPart) => {
+const notnot = (f: FormulaPart): FormulaPart => {
   if (f.type === "NOT" && f.include.type === "NOT") return f.include.include;
   return f;
 };
@@ -34,6 +34,29 @@ Deno.test("propositional:notnot:2", () => {
   // !P nothing change
   const actual = notnot({ type: "NOT", include: { type: "PROP", id: "P" } });
   const expected: FormulaPart = { type: "NOT", include: { type: "PROP", id: "P" } };
+  assertEquals(
+    actual,
+    expected,
+  );
+});
+
+const convertImplict = (f: FormulaPart): FormulaPart => {
+  if (f.type === "IMPLICT") return { type: "OR", left: { type: "NOT", include: f.left }, right: f.right };
+  return f;
+};
+
+Deno.test("propositional:convertImplict:1", () => {
+  // P -> Q = !P || Q
+  const actual = convertImplict({
+    type: "IMPLICT",
+    left: { type: "PROP", id: "P" },
+    right: { type: "PROP", id: "Q" },
+  });
+  const expected: FormulaPart = {
+    type: "OR",
+    left: { type: "NOT", include: { type: "PROP", id: "P" } },
+    right: { type: "PROP", id: "Q" },
+  };
   assertEquals(
     actual,
     expected,
