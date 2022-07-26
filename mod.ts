@@ -1,4 +1,5 @@
 import { assertEquals } from "std/testing/asserts.ts";
+import { deepMerge } from "std/collections/mod.ts";
 
 type FormulaPart =
   | { type: "PROP"; id: string }
@@ -253,7 +254,25 @@ const formula: FormulaPart = {
       right: { type: "PROP", id: "Q" },
     },
   },
-  right: { type: "PROP", id: "Q" },
+  right: { type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "Q" } } },
+};
+// (P || (Q && R)) -> ((P||Q)&&(P||R))
+const formula2: FormulaPart = {
+  type: "IMPLICT",
+  left: {
+    type: "OR",
+    left: { type: "PROP", id: "P" },
+    right: {
+      type: "AND",
+      left: { type: "PROP", id: "Q" },
+      right: { type: "PROP", id: "R" },
+    },
+  },
+  right: {
+    type: "AND",
+    left: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
+    right: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "R" } },
+  },
 };
 
 const showSerial = (steps: TransformStep[], nest: number) => {
@@ -273,4 +292,22 @@ const showSerial = (steps: TransformStep[], nest: number) => {
     }
   });
 };
-showSerial(step(formula, []), 0);
+showSerial(step({ type: "NOT", include: formula2 }, []), 0);
+
+const getProps = (steps: TransformStep[]): Record<string, unknown> => {
+  const ls = steps.at(-1);
+  if (!ls) return {};
+  switch (ls.type) {
+    case "PARARELL":
+      return deepMerge(getProps(ls.leftF), getProps(ls.rightF));
+    case "SERIAL":
+      if (ls.formula.type === "PROP") {
+        return { [ls.formula.id]: { t: true } };
+      }
+      if (ls.formula.type === "NOT" && ls.formula.include.type === "PROP") {
+        return { [ls.formula.include.id]: { b: true } };
+      }
+      return {};
+  }
+};
+console.dir(getProps(step({ type: "NOT", include: formula2 }, [])));
