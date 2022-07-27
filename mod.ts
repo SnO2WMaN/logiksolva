@@ -153,8 +153,8 @@ const expandNotImplict = (f: FormulaPart): TransformResult => {
       transformed: true,
       to: {
         type: "AND",
-        left: { type: "NOT", include: f.include.left },
-        right: f.include.right,
+        left: f.include.left,
+        right: { type: "NOT", include: f.include.right },
       },
     };
   }
