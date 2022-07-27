@@ -1,26 +1,31 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { deepMerge } from "std/collections/mod.ts";
+
+type PropFormula = { type: "PROP"; id: string };
+type NotFormula = { type: "NOT"; include: FormulaPart };
+type AndFormula = { type: "AND"; left: FormulaPart; right: FormulaPart };
+type ImplictFormula = { type: "IMPLICT"; left: FormulaPart; right: FormulaPart };
+type OrFormula = { type: "OR"; left: FormulaPart; right: FormulaPart };
 
 type FormulaPart =
-  | { type: "PROP"; id: string }
-  | { type: "NOT"; include: FormulaPart }
-  | { type: "AND"; left: FormulaPart; right: FormulaPart }
-  | { type: "OR"; left: FormulaPart; right: FormulaPart }
-  | { type: "IMPLICT"; left: FormulaPart; right: FormulaPart };
+  | PropFormula
+  | NotFormula
+  | AndFormula
+  | OrFormula
+  | ImplictFormula;
 
 type TransformResult =
   | { transformed: true; to: FormulaPart }
   | { transformed: false };
 
 // !!P = P
-const notnot = (f: FormulaPart): TransformResult => {
+const removeNotNot = (f: FormulaPart): TransformResult => {
   if (f.type === "NOT" && f.include.type === "NOT") return { transformed: true, to: f.include.include };
   return { transformed: false };
 };
 
 Deno.test("propositional:notnot:1", () => {
   // !!P = P
-  const actual = notnot({ type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "P" } } });
+  const actual = removeNotNot({ type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "P" } } });
   const expected: TransformResult = {
     transformed: true,
     to: { type: "PROP", id: "P" },
@@ -33,7 +38,7 @@ Deno.test("propositional:notnot:1", () => {
 
 Deno.test("propositional:notnot:2", () => {
   // !P nothing change
-  const actual = notnot({ type: "NOT", include: { type: "PROP", id: "P" } });
+  const actual = removeNotNot({ type: "NOT", include: { type: "PROP", id: "P" } });
   const expected: TransformResult = { transformed: false };
   assertEquals(
     actual,
@@ -42,7 +47,7 @@ Deno.test("propositional:notnot:2", () => {
 });
 
 // P -> Q = !P || Q
-const convertImplict = (f: FormulaPart): TransformResult => {
+const removeImplict = (f: FormulaPart): TransformResult => {
   if (f.type === "IMPLICT") {
     return { transformed: true, to: { type: "OR", left: { type: "NOT", include: f.left }, right: f.right } };
   }
@@ -51,7 +56,7 @@ const convertImplict = (f: FormulaPart): TransformResult => {
 
 Deno.test("propositional:convertImplict:1", () => {
   // P -> Q = !P || Q
-  const actual = convertImplict({
+  const actual = removeImplict({
     type: "IMPLICT",
     left: { type: "PROP", id: "P" },
     right: { type: "PROP", id: "Q" },
@@ -176,69 +181,49 @@ const show = (f: FormulaPart): string => {
   }
 };
 
-type TransformStep =
-  | { type: "SERIAL"; formula: FormulaPart }
-  | { type: "PARARELL"; leftF: TransformStep[]; rightF: TransformStep[] };
+type TransformStep = { formula: FormulaPart };
 const step = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
-  const nn = notnot(f);
+  const notAnd = expandNotAnd(f);
+  if (notAnd.transformed) {
+    return step(
+      notAnd.to,
+      [...steps, { formula: f }],
+    );
+  }
+  const notOr = expandNotOr(f);
+  if (notOr.transformed) {
+    return step(
+      notOr.to,
+      [...steps, { formula: f }],
+    );
+  }
+  const notImpl = expandNotImplict(f);
+  if (notImpl.transformed) {
+    return step(
+      notImpl.to,
+      [...steps, { formula: f }],
+    );
+  }
+  const nn = removeNotNot(f);
   if (nn.transformed) {
-    return step(nn.to, [
-      ...steps,
-      { type: "SERIAL", formula: f },
-    ]);
+    return step(
+      nn.to,
+      [...steps, { formula: f }],
+    );
   }
-  const exImpl = convertImplict(f);
-  if (exImpl.transformed) {
-    return step(exImpl.to, [
-      ...steps,
-      { type: "SERIAL", formula: f },
-    ]);
-  }
-
-  const exnotand = expandNotAnd(f);
-  if (exnotand.transformed) {
-    return step(exnotand.to, [
-      ...steps,
-      { type: "SERIAL", formula: f },
-    ]);
-  }
-
-  const exnotor = expandNotOr(f);
-  if (exnotor.transformed) {
-    return step(exnotor.to, [
-      ...steps,
-      { type: "SERIAL", formula: f },
-    ]);
-  }
-  const exnotimpl = expandNotImplict(f);
-  if (exnotimpl.transformed) {
-    return step(exnotimpl.to, [
-      ...steps,
-      { type: "SERIAL", formula: f },
-    ]);
+  const impl = removeImplict(f);
+  if (impl.transformed) {
+    return step(
+      impl.to,
+      [...steps, { formula: f }],
+    );
   }
 
   switch (f.type) {
     case "AND":
-    case "OR":
-    case "IMPLICT":
-      return [
-        ...steps,
-        {
-          type: "SERIAL",
-          formula: f,
-        },
-        {
-          type: "PARARELL",
-          leftF: step(f.left, []),
-          rightF: step(f.right, []),
-        },
-      ];
+      return [...steps, { formula: f }, ...step(f.left, []), ...step(f.right, [])];
     default:
-      return [
-        ...steps,
-        { type: "SERIAL", formula: f },
-      ];
+      return [...steps, { formula: f }];
   }
 };
 
@@ -275,39 +260,50 @@ const formula2: FormulaPart = {
   },
 };
 
-const showSerial = (steps: TransformStep[], nest: number) => {
+const showSerial = (steps: TransformStep[]) => {
   steps.forEach((step, i) => {
-    switch (step.type) {
-      case "SERIAL":
-        console.log([
-          "│".repeat(nest),
-          steps.length === 1 ? "└" : "├",
-          `${nest + 1}-${i + 1}: ${show(step.formula)}`,
-        ].join(""));
-        break;
-      case "PARARELL":
-        showSerial(step.leftF, nest + 1);
-        showSerial(step.rightF, nest + 1);
-        break;
-    }
+    console.log(`${i}:${show(step.formula)}`);
   });
 };
-showSerial(step({ type: "NOT", include: formula2 }, []), 0);
+// showSerial(step({ type: "NOT", include: formula2 }, []), 0);
 
-const getProps = (steps: TransformStep[]): Record<string, unknown> => {
-  const ls = steps.at(-1);
-  if (!ls) return {};
-  switch (ls.type) {
-    case "PARARELL":
-      return deepMerge(getProps(ls.leftF), getProps(ls.rightF));
-    case "SERIAL":
-      if (ls.formula.type === "PROP") {
-        return { [ls.formula.id]: { t: true } };
-      }
-      if (ls.formula.type === "NOT" && ls.formula.include.type === "PROP") {
-        return { [ls.formula.include.id]: { b: true } };
-      }
-      return {};
-  }
-};
-console.dir(getProps(step({ type: "NOT", include: formula2 }, [])));
+// const getProps = (steps: TransformStep[]) => {
+//   const [first, ...rest] = steps;
+//   console.dir(first);
+//   console.dir(rest);
+//   if (first.type === "SERIAL" && first.formula.type === "PROP") {
+//     return ({ [first.formula.id]: { t: true } });
+//   }
+// };
+// console.dir(getProps(step({ type: "NOT", include: formula2 }, [])));
+
+// |- (A -> B) -> ((B -> C) -> (A -> C))
+showSerial(
+  step(
+    {
+      type: "NOT",
+      include: {
+        type: "IMPLICT",
+        left: {
+          type: "IMPLICT",
+          left: { type: "PROP", id: "A" },
+          right: { type: "PROP", id: "B" },
+        },
+        right: {
+          type: "IMPLICT",
+          left: {
+            type: "IMPLICT",
+            left: { type: "PROP", id: "B" },
+            right: { type: "PROP", id: "C" },
+          },
+          right: {
+            type: "IMPLICT",
+            left: { type: "PROP", id: "A" },
+            right: { type: "PROP", id: "C" },
+          },
+        },
+      },
+    },
+    [],
+  ),
+);
