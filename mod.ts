@@ -1,4 +1,6 @@
 import { assertEquals } from "std/testing/asserts.ts";
+import { deepMerge } from "std/collections/mod.ts";
+import { bold } from "std/fmt/colors.ts";
 
 type PropFormula = { type: "PROP"; id: string };
 type NotFormula = { type: "NOT"; include: FormulaPart };
@@ -16,62 +18,6 @@ type FormulaPart =
 type TransformResult =
   | { transformed: true; to: FormulaPart }
   | { transformed: false };
-
-// (P /\ (P -> Q)) -> Q
-const formula: FormulaPart = {
-  type: "IMPLICT",
-  left: {
-    type: "AND",
-    left: { type: "PROP", id: "P" },
-    right: {
-      type: "IMPLICT",
-      left: { type: "PROP", id: "P" },
-      right: { type: "PROP", id: "Q" },
-    },
-  },
-  right: { type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "Q" } } },
-};
-// (P || (Q && R)) -> ((P||Q)&&(P||R))
-const formula2: FormulaPart = {
-  type: "IMPLICT",
-  left: {
-    type: "OR",
-    left: { type: "PROP", id: "P" },
-    right: {
-      type: "AND",
-      left: { type: "PROP", id: "Q" },
-      right: { type: "PROP", id: "R" },
-    },
-  },
-  right: {
-    type: "AND",
-    left: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-    right: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "R" } },
-  },
-};
-
-// |- (A -> B) -> ((B -> C) -> (A -> C))
-const formula3: FormulaPart = {
-  type: "IMPLICT",
-  left: {
-    type: "IMPLICT",
-    left: { type: "PROP", id: "A" },
-    right: { type: "PROP", id: "B" },
-  },
-  right: {
-    type: "IMPLICT",
-    left: {
-      type: "IMPLICT",
-      left: { type: "PROP", id: "B" },
-      right: { type: "PROP", id: "C" },
-    },
-    right: {
-      type: "IMPLICT",
-      left: { type: "PROP", id: "A" },
-      right: { type: "PROP", id: "C" },
-    },
-  },
-};
 
 // !!P = P
 const removeNotNot = (f: FormulaPart): TransformResult => {
@@ -237,18 +183,21 @@ const show = (f: FormulaPart): string => {
   }
 };
 
+type SerialStep<f extends FormulaPart = FormulaPart> = {
+  type: "SERIAL";
+  formula: f;
+};
+type PararellStep<f extends FormulaPart = FormulaPart> = {
+  type: "PARARELL";
+  formula: f;
+  left: TransformStep[];
+  right: TransformStep[];
+};
+
 type TransformStep<f extends FormulaPart = FormulaPart> =
-  | {
-    type: "SERIAL";
-    formula: f;
-  }
-  | {
-    type: "PARARELL";
-    formula: f;
-    left: TransformStep[];
-    right: TransformStep[];
-  };
-const mkSerial = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
+  | SerialStep<f>
+  | PararellStep<f>;
+const mkSerial = (f: FormulaPart, steps: TransformStep[] = []): TransformStep[] => {
   const notAnd = expandNotAnd(f);
   if (notAnd.transformed) {
     return mkSerial(
@@ -305,8 +254,6 @@ const mkSerial = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
 // };
 // console.dir(getProps(step({ type: "NOT", include: formula2 }, [])));
 
-const steped = mkSerial({ type: "NOT", include: formula3 }, []);
-
 const mkPararell = (l: TransformStep[]): TransformStep[] => {
   const notOrs = l.filter((v): v is TransformStep<Exclude<FormulaPart, OrFormula>> => v.formula.type !== "OR");
   const ors = l.filter((v): v is TransformStep<OrFormula> => v.formula.type === "OR");
@@ -323,11 +270,6 @@ const mkPararell = (l: TransformStep[]): TransformStep[] => {
       right: [...mkSerial(firstOr.formula.right, []), ...mkPararell(orRest)],
     },
   ];
-
-  // return [
-  //   [...notOrs, ...mkSerial(firstOr.formula.left, []), ...orRest],
-  //   [...notOrs, ...mkSerial(firstOr.formula.right, []), ...orRest],
-  // ].reduce((p, c) => [...p, ...mkPararell(c)], [] as TransformStep<FormulaPart>[][]);
 };
 
 const showSerial = (steps: TransformStep[], nest = 0) => {
@@ -335,10 +277,119 @@ const showSerial = (steps: TransformStep[], nest = 0) => {
     console.log(`${" ".repeat(nest)}${i}:${show(step.formula)}`);
     if (step.type === "PARARELL") {
       showSerial(step.left, nest + 1);
-      console.log(`${" ".repeat(nest)}-`);
+      console.log(`${" ".repeat(nest + 1)}-`);
       showSerial(step.right, nest + 1);
     }
   });
 };
 
-showSerial(mkPararell(steped));
+type PropsTable = Record<string, { t?: true; b?: true }>;
+const generatePropsTable = (p: TransformStep[], prev: PropsTable): PropsTable[] => {
+  const props = p.filter((step): step is SerialStep<PropFormula | NotFormula> =>
+    step.type === "SERIAL" &&
+    (step.formula.type === "PROP" || (step.formula.type === "NOT" && step.formula.include.type === "PROP"))
+  ).map(({ formula }) =>
+    formula.type === "NOT"
+      ? { [(formula.include as PropFormula).id]: { b: true as const } }
+      : { [formula.id]: { t: true as const } }
+  ).reduce((p: PropsTable, c) => deepMerge(p, c), {} as PropsTable);
+  const prl = p.find((step): step is PararellStep => step.type === "PARARELL");
+  if (prl) {
+    return [
+      ...generatePropsTable(prl.right, deepMerge(prev, props)),
+      ...generatePropsTable(prl.left, deepMerge(prev, props)),
+    ];
+  }
+
+  return [deepMerge(prev, props)];
+};
+
+const check = (f: FormulaPart) => {
+  return generatePropsTable(mkPararell(mkSerial({ type: "NOT", include: f })), {})
+    .every((t) => Object.values(t).some(({ t, b }) => t && b));
+};
+const print = (f: FormulaPart) => {
+  console.log(`${bold(show(f))} is ${check(f) ? "valid" : "invalid"}`);
+  showSerial(mkPararell(mkSerial({ type: "NOT", include: f })));
+};
+
+// |= (P && (P -> Q)) -> !!Q
+print({
+  type: "IMPLICT",
+  left: {
+    type: "AND",
+    left: { type: "PROP", id: "P" },
+    right: {
+      type: "IMPLICT",
+      left: { type: "PROP", id: "P" },
+      right: { type: "PROP", id: "Q" },
+    },
+  },
+  right: { type: "NOT", include: { type: "NOT", include: { type: "PROP", id: "Q" } } },
+});
+print(
+  // |= (P || (Q && R)) -> ((P||Q)&&(P||R))
+  {
+    type: "IMPLICT",
+    left: {
+      type: "OR",
+      left: { type: "PROP", id: "P" },
+      right: {
+        type: "AND",
+        left: { type: "PROP", id: "Q" },
+        right: { type: "PROP", id: "R" },
+      },
+    },
+    right: {
+      type: "AND",
+      left: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
+      right: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "R" } },
+    },
+  },
+);
+print(
+  // |= (A -> B) -> ((B -> C) -> (A -> C))
+  {
+    type: "IMPLICT",
+    left: {
+      type: "IMPLICT",
+      left: { type: "PROP", id: "A" },
+      right: { type: "PROP", id: "B" },
+    },
+    right: {
+      type: "IMPLICT",
+      left: {
+        type: "IMPLICT",
+        left: { type: "PROP", id: "B" },
+        right: { type: "PROP", id: "C" },
+      },
+      right: {
+        type: "IMPLICT",
+        left: { type: "PROP", id: "A" },
+        right: { type: "PROP", id: "C" },
+      },
+    },
+  },
+);
+print(
+  // |= (A -> B) -> ((B -> C) -> (A -> C))
+  {
+    type: "IMPLICT",
+    left: {
+      type: "IMPLICT",
+      left: {
+        type: "IMPLICT",
+        left: { type: "PROP", id: "A" },
+        right: { type: "PROP", id: "B" },
+      },
+      right: {
+        type: "PROP",
+        id: "B",
+      },
+    },
+    right: {
+      type: "PROP",
+      id: "A",
+    },
+  },
+);
