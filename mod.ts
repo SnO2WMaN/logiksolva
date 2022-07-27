@@ -181,8 +181,8 @@ const show = (f: FormulaPart): string => {
   }
 };
 
-type TransformStep = { formula: FormulaPart };
-const step = (f: FormulaPart, steps: TransformStep[]): TransformStep[] => {
+type TransformStep<f extends FormulaPart> = { formula: f };
+const step = (f: FormulaPart, steps: TransformStep<FormulaPart>[]): TransformStep<FormulaPart>[] => {
   const notAnd = expandNotAnd(f);
   if (notAnd.transformed) {
     return step(
@@ -260,7 +260,7 @@ const formula2: FormulaPart = {
   },
 };
 
-const showSerial = (steps: TransformStep[]) => {
+const showSerial = (steps: TransformStep<FormulaPart>[]) => {
   steps.forEach((step, i) => {
     console.log(`${i}:${show(step.formula)}`);
   });
@@ -278,32 +278,47 @@ const showSerial = (steps: TransformStep[]) => {
 // console.dir(getProps(step({ type: "NOT", include: formula2 }, [])));
 
 // |- (A -> B) -> ((B -> C) -> (A -> C))
-showSerial(
-  step(
-    {
-      type: "NOT",
-      include: {
-        type: "IMPLICT",
-        left: {
-          type: "IMPLICT",
-          left: { type: "PROP", id: "A" },
-          right: { type: "PROP", id: "B" },
-        },
-        right: {
-          type: "IMPLICT",
-          left: {
-            type: "IMPLICT",
-            left: { type: "PROP", id: "B" },
-            right: { type: "PROP", id: "C" },
-          },
-          right: {
-            type: "IMPLICT",
-            left: { type: "PROP", id: "A" },
-            right: { type: "PROP", id: "C" },
-          },
-        },
-      },
+const formula3: FormulaPart = {
+  type: "IMPLICT",
+  left: {
+    type: "IMPLICT",
+    left: { type: "PROP", id: "A" },
+    right: { type: "PROP", id: "B" },
+  },
+  right: {
+    type: "IMPLICT",
+    left: {
+      type: "IMPLICT",
+      left: { type: "PROP", id: "B" },
+      right: { type: "PROP", id: "C" },
     },
-    [],
-  ),
-);
+    right: {
+      type: "IMPLICT",
+      left: { type: "PROP", id: "A" },
+      right: { type: "PROP", id: "C" },
+    },
+  },
+};
+
+const steped = step({ type: "NOT", include: formula2 }, []);
+
+const mkParal = (l: TransformStep<FormulaPart>[]): TransformStep<FormulaPart>[][] => {
+  const exOrs = l.filter((v) => v.formula.type !== "OR");
+  const ors = l.filter((v): v is TransformStep<OrFormula> => v.formula.type === "OR");
+
+  const [first, ...rest] = ors;
+  if (!first) return [l];
+
+  return [
+    [...exOrs, ...step(first.formula.left, []), ...rest],
+    [...exOrs, ...step(first.formula.right, []), ...rest],
+  ].reduce(
+    (p, c) => [...p, ...mkParal(c)],
+    [] as TransformStep<FormulaPart>[][],
+  );
+};
+
+mkParal(steped).forEach((tree) => {
+  console.log("***");
+  showSerial(tree);
+});
