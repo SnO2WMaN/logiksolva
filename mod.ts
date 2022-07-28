@@ -56,7 +56,7 @@ print(identity);
 print(transitive);
 // 移入律
 print(importation);
-// 排出律
+// 移出律
 print(exportation);
 // De Morgan
 print(demorganAndOr);

@@ -288,8 +288,8 @@ export const mkImportation = (
   type: "IMPLICT",
   left: {
     type: "IMPLICT",
-    left: { type: "IMPLICT", left: phi, right: psi },
-    right: xi,
+    left: phi,
+    right: { type: "IMPLICT", left: psi, right: xi },
   },
   right: {
     type: "IMPLICT",
@@ -303,7 +303,7 @@ export const importation: PropFormula = mkImportation(
   { type: "PROP", id: "R" },
 );
 
-// 排出律
+// 移出律
 // ⊨ (Φ ∧ Ψ → χ) → (Φ → Ψ → χ)
 export const mkExportation = (
   phi: PropFormula,
@@ -318,8 +318,8 @@ export const mkExportation = (
   },
   right: {
     type: "IMPLICT",
-    left: { type: "IMPLICT", left: phi, right: psi },
-    right: xi,
+    left: phi,
+    right: { type: "IMPLICT", left: psi, right: xi },
   },
 });
 export const exportation: PropFormula = mkExportation(
@@ -405,7 +405,7 @@ export const disjunctiveSyllogism: PropFormula = mkDisjunctiveSyllogism(
 );
 
 // 構成的両刃論法
-// ⊨ (Φ → χ) → (Ψ → χ) → ((Φ → Ψ) → χ)
+// ⊨ (Φ → χ) → ((Ψ → χ) → (Φ ∨ Ψ → χ))
 export const mkConstructiveDilemma = (
   phi: PropFormula,
   psi: PropFormula,
@@ -414,21 +414,21 @@ export const mkConstructiveDilemma = (
   type: "IMPLICT",
   left: {
     type: "IMPLICT",
+    left: phi,
+    right: xi,
+  },
+  right: {
+    type: "IMPLICT",
     left: {
-      type: "IMPLICT",
-      left: phi,
-      right: xi,
-    },
-    right: {
       type: "IMPLICT",
       left: psi,
       right: xi,
     },
-  },
-  right: {
-    type: "IMPLICT",
-    left: { type: "OR", left: phi, right: psi },
-    right: xi,
+    right: {
+      type: "IMPLICT",
+      left: { type: "OR", left: phi, right: psi },
+      right: xi,
+    },
   },
 });
 export const constructiveDilemma: PropFormula = mkConstructiveDilemma(
