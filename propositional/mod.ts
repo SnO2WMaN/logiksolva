@@ -34,6 +34,6 @@ const check = (f: PropFormula) => {
     .every((t) => Object.values(t).some(({ t, b }) => t && b));
 };
 export const print = (f: PropFormula) => {
-  console.log(`${bold(show(f))} is ${check(f) ? "valid" : "invalid"}`);
-  showSerial(generateTableau({ type: "NOT", in: f }));
+  console.log(`${check(f) ? "⊨" : "⊭"} ${bold(show(f))}`);
+  // showSerial(generateTableau({ type: "NOT", in: f }));
 };
