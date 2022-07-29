@@ -28,7 +28,14 @@ import {
   transitive,
 } from "./propositional/tautology.ts";
 import { print } from "./propositional/mod.ts";
+import {
+  affirmingConsequent,
+  affirmingDisjunct,
+  denyingAntecedent,
+  fallancyFallancy,
+} from "./propositional/fallancy.ts";
 
+// トートロジー
 // 結合律
 print(associativeAnd);
 print(associativeOr);
@@ -76,5 +83,12 @@ print(disjunctiveSyllogism);
 // 構成的両刃論法
 print(constructiveDilemma);
 
-// // 非妥当
-// print(invalidFormula1);
+// 誤謬
+// 後件肯定
+print(affirmingConsequent);
+// 後件肯定
+print(denyingAntecedent);
+// 選言肯定
+print(affirmingDisjunct);
+// 誤謬の誤謬
+print(fallancyFallancy);
