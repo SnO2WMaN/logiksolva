@@ -381,8 +381,8 @@ export const modusPonens: PropFormula = mkModusPonens(
   { type: "PROP", id: "Q" },
 );
 
-// 宣言的三段論法
-// ⊨ ¬Φ ∧ (Φ → Ψ) → Ψ
+// 選言的三段論法
+// ⊨ ¬Φ ∧ (Φ ∨ Ψ) → Ψ
 export const mkDisjunctiveSyllogism = (
   phi: PropFormula,
   psi: PropFormula,

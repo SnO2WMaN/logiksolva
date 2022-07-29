@@ -71,9 +71,9 @@ print(excludeMiddle);
 print(nonContradiction);
 // モーダスポネンス
 print(modusPonens);
-// 宣言的三段論法
+// 選言的三段論法
 print(disjunctiveSyllogism);
-// 宣言的三段論法
+// 構成的両刃論法
 print(constructiveDilemma);
 
 // // 非妥当
