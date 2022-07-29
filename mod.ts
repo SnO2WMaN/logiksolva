@@ -26,7 +26,7 @@ import {
   simplificationLeft,
   simplificationRight,
   transitive,
-} from "./propositional/formulas.ts";
+} from "./propositional/tautology.ts";
 import { print } from "./propositional/mod.ts";
 
 // 結合律

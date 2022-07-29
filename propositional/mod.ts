@@ -29,7 +29,7 @@ const showSerial = (steps: Tableau, nest = 0) => {
   });
 };
 
-const check = (f: PropFormula) => {
+export const check = (f: PropFormula) => {
   return generatePropsTable(generateTableau({ type: "NOT", in: f }), {})
     .every((t) => Object.values(t).some(({ t, b }) => t && b));
 };
