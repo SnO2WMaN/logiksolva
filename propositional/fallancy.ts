@@ -15,15 +15,15 @@ export const affirmingConsequent: PropFormula = mkAffirmingConsequent(
   { type: "PROP", id: "Q" },
 );
 
-// 前件肯定
-// ⊭ (Φ → Ψ) → (¬Φ → ¬Ψ)
+// 前件否定
+// ⊭ ((Φ → Ψ) ∧ ¬Φ) → ¬Ψ
 export const mkDenyingAntecedent = (
   phi: PropFormula,
   psi: PropFormula,
 ): PropFormula => ({
   type: "IMPLICT",
-  left: { type: "IMPLICT", left: phi, right: psi },
-  right: { type: "IMPLICT", left: { type: "NOT", in: phi }, right: { type: "NOT", in: psi } },
+  left: { type: "AND", left: { type: "IMPLICT", left: phi, right: psi }, right: { type: "NOT", in: phi } },
+  right: { type: "NOT", in: psi },
 });
 export const denyingAntecedent: PropFormula = mkDenyingAntecedent(
   { type: "PROP", id: "P" },
