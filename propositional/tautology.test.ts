@@ -1,4 +1,4 @@
-import { assertEquals } from "https://deno.land/std@0.118.0/testing/asserts.ts";
+import { assertEquals } from "std/testing/asserts.ts";
 import {
   absorptiveAndOr,
   absorptiveOrAnd,
@@ -29,105 +29,105 @@ import {
 import { check } from "./mod.ts";
 
 Deno.test("propositional:tautology:associativeAnd", () => {
-  assertEquals(true, check(associativeAnd));
+  assertEquals(check(associativeAnd), true);
 });
 Deno.test("propositional:tautology:associativeOr", () => {
-  assertEquals(true, check(associativeOr));
+  assertEquals(check(associativeOr), true);
 });
 
 Deno.test("propositional:tautology:commutativeAnd", () => {
-  assertEquals(true, check(commutativeAnd));
+  assertEquals(check(commutativeAnd), true);
 });
 Deno.test("propositional:tautology:commutativeOr", () => {
-  assertEquals(true, check(commutativeOr));
+  assertEquals(check(commutativeOr), true);
 });
 
 Deno.test("propositional:tautology:absorptiveAndOr", () => {
-  assertEquals(true, check(absorptiveAndOr));
+  assertEquals(check(absorptiveAndOr), true);
 });
 Deno.test("propositional:tautology:absorptiveOrAnd", () => {
-  assertEquals(true, check(absorptiveOrAnd));
+  assertEquals(check(absorptiveOrAnd), true);
 });
 
 Deno.test("propositional:tautology:idempotentAnd", () => {
-  assertEquals(true, check(idempotentAnd));
+  assertEquals(check(idempotentAnd), true);
 });
 Deno.test("propositional:tautology:idempotentOr", () => {
-  assertEquals(true, check(idempotentOr));
+  assertEquals(check(idempotentOr), true);
 });
 
 Deno.test("propositional:tautology:simplificationLeft", () => {
-  assertEquals(true, check(simplificationLeft));
+  assertEquals(check(simplificationLeft), true);
 });
 Deno.test("propositional:tautology:simplificationRight", () => {
-  assertEquals(true, check(simplificationRight));
+  assertEquals(check(simplificationRight), true);
 });
 
 Deno.test("propositional:tautology:additionLeft", () => {
-  assertEquals(true, check(additionLeft));
+  assertEquals(check(additionLeft), true);
 });
 Deno.test("propositional:tautology:additionRight", () => {
-  assertEquals(true, check(additionRight));
+  assertEquals(check(additionRight), true);
 });
 
 Deno.test("propositional:tautology:distributiveAndOr", () => {
-  assertEquals(true, check(distributiveAndOr));
+  assertEquals(check(distributiveAndOr), true);
 });
 Deno.test("propositional:tautology:distributiveOrAnd", () => {
-  assertEquals(true, check(distributiveOrAnd));
+  assertEquals(check(distributiveOrAnd), true);
 });
 
 Deno.test("propositional:tautology:transitive", () => {
-  assertEquals(true, check(distributiveAndOr));
+  assertEquals(check(distributiveAndOr), true);
 });
 
 Deno.test("propositional:tautology:identity", () => {
-  assertEquals(true, check(distributiveAndOr));
+  assertEquals(check(distributiveAndOr), true);
 });
 
 Deno.test("propositional:tautology:contraposition", () => {
-  assertEquals(true, check(contraposition));
+  assertEquals(check(contraposition), true);
 });
 
 Deno.test("propositional:tautology:doubleNegation", () => {
-  assertEquals(true, check(doubleNegation));
+  assertEquals(check(doubleNegation), true);
 });
 
 Deno.test("propositional:tautology:excludeMiddle", () => {
-  assertEquals(true, check(excludeMiddle));
+  assertEquals(check(excludeMiddle), true);
 });
 
 Deno.test("propositional:tautology:nonContradiction", () => {
-  assertEquals(true, check(nonContradiction));
+  assertEquals(check(nonContradiction), true);
 });
 
 Deno.test("propositional:tautology:importation", () => {
-  assertEquals(true, check(importation));
+  assertEquals(check(importation), true);
 });
 
 Deno.test("propositional:tautology:exportation", () => {
-  assertEquals(true, check(exportation));
+  assertEquals(check(exportation), true);
 });
 
 Deno.test("propositional:tautology:demorganAndOr", () => {
-  assertEquals(true, check(demorganAndOr));
+  assertEquals(check(demorganAndOr), true);
 });
 Deno.test("propositional:tautology:demorganOrAnd", () => {
-  assertEquals(true, check(demorganOrAnd));
+  assertEquals(check(demorganOrAnd), true);
 });
 
 Deno.test("propositional:tautology:modusPonens", () => {
-  assertEquals(true, check(modusPonens));
+  assertEquals(check(modusPonens), true);
 });
 
 Deno.test("propositional:tautology:disjunctiveSyllogism", () => {
-  assertEquals(true, check(disjunctiveSyllogism));
+  assertEquals(check(disjunctiveSyllogism), true);
 });
 
 Deno.test("propositional:tautology:disjunctiveSyllogism", () => {
-  assertEquals(true, check(disjunctiveSyllogism));
+  assertEquals(check(disjunctiveSyllogism), true);
 });
 
 Deno.test("propositional:tautology:constructiveDilemma", () => {
-  assertEquals(true, check(constructiveDilemma));
+  assertEquals(check(constructiveDilemma), true);
 });
