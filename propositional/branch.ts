@@ -120,52 +120,16 @@ export const disassemblyFormula = (f: Exclude<PropFormula, Or>): { next: PropFor
   }
 };
 
-console.dir(
-  toBranch({
-    nodes: [],
-    stack: [
-      {
-        type: "NOT",
-        in: {
-          type: "AND",
-          left: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-          right: { type: "OR", left: { type: "PROP", id: "R" }, right: { type: "PROP", id: "S" } },
-        },
-      },
-    ],
-    skip: [],
-    left: null,
-    right: null,
-    props: {},
-  }),
-  { depth: Number.MAX_SAFE_INTEGER },
-);
+export const createFirstBranch = (f: PropFormula) => ({
+  stack: [f],
+  nodes: [],
+  skip: [],
+  left: null,
+  right: null,
+  props: {},
+});
 
-console.dir(
-  toBranch({
-    nodes: [],
-    stack: [
-      {
-        type: "NOT",
-        in: {
-          type: "IMPLICT",
-          left: {
-            type: "AND",
-            left: { type: "PROP", id: "P" },
-            right: { type: "OR", left: { type: "PROP", id: "S" }, right: { type: "PROP", id: "R" } },
-          },
-          right: {
-            type: "OR",
-            left: { type: "AND", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "S" } },
-            right: { type: "AND", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "R" } },
-          },
-        },
-      },
-    ],
-    skip: [],
-    left: null,
-    right: null,
-    props: {},
-  }),
-  { depth: Number.MAX_SAFE_INTEGER },
-);
+export const checkValid = (b: Branch): boolean => {
+  if (b.left && b.right) return checkValid(b.left) && checkValid(b.right);
+  return b.valid === true;
+};
