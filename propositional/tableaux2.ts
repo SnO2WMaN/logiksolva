@@ -291,7 +291,7 @@ export const serialize = (t: TreeNode): {
   );
 };
 
-Deno.test("propositional:tableaux:serialize:1", () => {
+Deno.test("propositional:tableaux:serialize:and", () => {
   // 1-1. P && Q
   // 1-2. P
   // 1-3. Q
@@ -315,7 +315,7 @@ Deno.test("propositional:tableaux:serialize:1", () => {
   );
 });
 
-Deno.test("propositional:tableaux:serialize:and", () => {
+Deno.test("propositional:tableaux:serialize:double_and", () => {
   // 1-1. (P && Q) && (R && S)
   // 1-2. (P && Q)
   // 1-2-1. P
@@ -359,34 +359,6 @@ Deno.test("propositional:tableaux:serialize:and", () => {
         R: { 1: true },
         S: { 1: true },
       },
-    },
-  );
-});
-
-Deno.test("propositional:tableaux:serialize:double_and", () => {
-  // 1-1s. P || Q
-  const actual = serialize(
-    {
-      eval: false,
-      formula: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-    },
-  );
-  assertEquals(
-    actual,
-    {
-      tree: [
-        {
-          eval: true,
-          formula: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-        },
-      ],
-      props: {},
-      skip: [
-        {
-          eval: false,
-          formula: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-        },
-      ],
     },
   );
 });
