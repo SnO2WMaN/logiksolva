@@ -1,13 +1,13 @@
-import { assertEquals } from "std/testing/asserts.ts";
 import { deepMerge } from "std/collections/mod.ts";
-import { PropFormula } from "./types.ts";
+import { assertEquals } from "std/testing/asserts.ts";
+import { Or, PropFormula } from "./types.ts";
 
-export type TreeNode = { formula: PropFormula; eval: boolean };
+export type TreeNode<F extends PropFormula = PropFormula> = { formula: F; eval: boolean };
 export type PropsTable = Record<string, { 0?: true; 1?: true }>;
 
 export const step = (t: TreeNode): {
   next: TreeNode[];
-  skip: TreeNode[];
+  skip: TreeNode<Or>[];
   props: PropsTable;
 } => {
   if (t.formula.type === "PROP") {
@@ -274,7 +274,7 @@ Deno.test("propositional:tableaux:step:not_impl", () => {
 
 export const serialize = (t: TreeNode): {
   tree: TreeNode[];
-  skip: TreeNode[];
+  skip: TreeNode<Or>[];
   props: PropsTable;
 } => {
   const { next, props, skip } = step(t);
@@ -439,13 +439,15 @@ Deno.test("propositional:tableaux:serialize:and_or", () => {
   );
 });
 
-console.dir(serialize(
-  {
-    eval: false,
-    formula: {
-      type: "AND",
-      left: { type: "PROP", id: "P" },
-      right: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
-    },
-  },
-));
+const paral = (f: PropFormula) => {
+  const { tree, props, skip } = serialize({ eval: false, formula: f });
+  console.dir(skip.map((s) => [
+    serialize({ eval: false, formula: s.formula.left }),
+    serialize({ eval: false, formula: s.formula.right }),
+  ]));
+};
+paral({
+  type: "AND",
+  left: { type: "PROP", id: "P" },
+  right: { type: "OR", left: { type: "PROP", id: "P" }, right: { type: "PROP", id: "Q" } },
+});
