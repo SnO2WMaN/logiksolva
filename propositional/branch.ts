@@ -87,6 +87,15 @@ export const disassemblyFormula = (f: Exclude<PropFormula, Or>): { next: PropFor
     return { next: [f.left, f.right], props: {} };
   } else if (f.type === "IMPLICT") {
     return { next: [{ type: "OR", left: { type: "NOT", in: f.left }, right: f.right }], props: {} };
+  } else if (f.type === "EQ") {
+    return {
+      next: [{
+        type: "OR",
+        left: { type: "AND", left: f.left, right: f.right },
+        right: { type: "AND", left: { type: "NOT", in: f.left }, right: { type: "NOT", in: f.right } },
+      }],
+      props: {},
+    };
   } else if (f.type === "NOT") {
     switch (f.in.type) {
       case "NOT":
@@ -104,6 +113,14 @@ export const disassemblyFormula = (f: Exclude<PropFormula, Or>): { next: PropFor
       case "IMPLICT":
         return {
           next: [f.in.left, { type: "NOT", in: f.in.right }],
+          props: {},
+        };
+      case "EQ":
+        return {
+          next: [
+            { type: "OR", left: f.in.left, right: f.in.right },
+            { type: "OR", left: { type: "NOT", in: f.in.left }, right: { type: "NOT", in: f.in.right } },
+          ],
           props: {},
         };
       case "PROP":

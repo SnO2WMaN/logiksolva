@@ -2,7 +2,7 @@
 
 import { PropFormula } from "./types.ts";
 
-// 結合律 TODO:
+// 結合律
 // ⊨ (Φ ∧ Ψ) ∧ χ ↔ Φ ∧ (Ψ ∧ χ)
 // ⊨ (Φ ∨ Ψ) ∨ χ ↔ Φ ∨ (Ψ ∨ χ)
 export const mkAssociative = (
@@ -11,7 +11,7 @@ export const mkAssociative = (
   psi: PropFormula,
   xi: PropFormula,
 ): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: { type: type, left: phi, right: { type: type, left: psi, right: xi } },
   right: { type: type, left: { type: type, left: phi, right: psi }, right: xi },
 });
@@ -28,11 +28,11 @@ export const associativeOr: PropFormula = mkAssociative(
   { type: "PROP", id: "R" },
 );
 
-// 交換律 TODO:
+// 交換律
 // ⊨ (Φ ∧ Ψ) ↔ (Ψ ∧ Φ)
 // ⊨ (Φ ∨ Ψ) ↔ (Ψ ∨ Φ)
 export const mkCommutative = (type: "AND" | "OR", phi: PropFormula, psi: PropFormula): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: {
     type: type,
     left: phi,
@@ -55,7 +55,7 @@ export const commutativeOr: PropFormula = mkCommutative(
   { type: "PROP", id: "Q" },
 );
 
-// 吸収律 TODO:
+// 吸収律
 // ⊨ Φ ∧ (Φ ∨ Ψ) ↔ Φ
 // ⊨ Φ ∨ (Φ ∧ Ψ) ↔ Φ
 export const mkAbsorptive = (
@@ -63,7 +63,7 @@ export const mkAbsorptive = (
   phi: PropFormula,
   psi: PropFormula,
 ): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: { type: type[0], left: phi, right: { type: type[1], left: phi, right: psi } },
   right: phi,
 });
@@ -78,14 +78,14 @@ export const absorptiveOrAnd: PropFormula = mkAbsorptive(
   { type: "PROP", id: "Q" },
 );
 
-// 冪等律 TODO:
+// 冪等律
 // ⊨ Φ ∧ Φ ↔ Φ
 // ⊨ Φ ∨ Φ ↔ Φ
 export const mkIdempotent = (
   type: "AND" | "OR",
   phi: PropFormula,
 ): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: { type: type, left: phi, right: phi },
   right: phi,
 });
@@ -138,7 +138,7 @@ export const mkAddition = (
 export const additionLeft: PropFormula = mkAddition("LEFT", { type: "PROP", id: "P" }, { type: "PROP", id: "Q" });
 export const additionRight: PropFormula = mkAddition("RIGHT", { type: "PROP", id: "P" }, { type: "PROP", id: "Q" });
 
-// 分配律 TODO:
+// 分配律
 // ⊨ Φ ∧ (Ψ ∨ χ) ↔ (Φ ∧ Ψ) ∨ (Φ ∧ χ)
 // ⊨ Φ ∨ (Ψ ∧ χ) ↔ (Φ ∨ Ψ) ∧ (Φ ∨ χ)
 export const mkDistributive = (
@@ -147,7 +147,7 @@ export const mkDistributive = (
   psi: PropFormula,
   xi: PropFormula,
 ): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: {
     type: type[0],
     left: phi,
@@ -216,13 +216,13 @@ export const identity: PropFormula = mkIdentity(
   { type: "PROP", id: "P" },
 );
 
-// 対偶律 TODO:
-// ⊨ Φ ↔ Ψ ↔ ¬Ψ ↔ ¬Φ
+// 対偶律
+// ⊨ Φ → Ψ ↔ ¬Ψ → ¬Φ
 export const mkContraposition = (
   phi: PropFormula,
   psi: PropFormula,
 ): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: ({
     type: "IMPLICT",
     left: phi,
@@ -239,10 +239,10 @@ export const contraposition: PropFormula = mkContraposition(
   { type: "PROP", id: "Q" },
 );
 
-// 二重否定律 TODO:
+// 二重否定律
 // ⊨ Φ ↔ ¬¬Φ
 export const mkDoubleNegation = (phi: PropFormula): PropFormula => ({
-  type: "IMPLICT",
+  type: "EQ",
   left: phi,
   right: ({
     type: "NOT",

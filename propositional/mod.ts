@@ -1,4 +1,4 @@
-import { bold, brightGreen, green, red } from "std/fmt/colors.ts";
+import { bold, green, red } from "std/fmt/colors.ts";
 import { checkValid, createFirstBranch, toBranch } from "./branch.ts";
 import { PropFormula } from "./types.ts";
 
@@ -14,6 +14,8 @@ const show = (f: PropFormula): string => {
       return `(${show(f.left)}∨${show(f.right)})`;
     case "IMPLICT":
       return `(${show(f.left)}→${show(f.right)})`;
+    case "EQ":
+      return `(${show(f.left)}↔${show(f.right)})`;
   }
 };
 

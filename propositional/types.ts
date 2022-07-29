@@ -3,15 +3,15 @@ export type Not = { type: "NOT"; in: PropFormula };
 export type And = { type: "AND"; left: PropFormula; right: PropFormula };
 export type Or = { type: "OR"; left: PropFormula; right: PropFormula };
 export type Implict = { type: "IMPLICT"; left: PropFormula; right: PropFormula };
-// export type Eq = { type: "Eq"; left: PropFormula; right: PropFormula };
+export type Eq = { type: "EQ"; left: PropFormula; right: PropFormula };
 
 export type PropFormula =
   | Prop
   | Not
   | And
   | Or
-  | Implict;
-// | Eq;
+  | Implict
+  | Eq;
 
 export type SerialStep<f extends PropFormula = PropFormula> = {
   type: "SERIAL";
