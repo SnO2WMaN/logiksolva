@@ -61,5 +61,13 @@
       "fileMatch": ["deno.jsonc"],
       "url": "https://deno.land/x/deno/cli/schemas/config-file.v1.json"
     }
-  ]
+  ],
+  "yaml.schemas": {
+    "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json": [
+      ".github/workflows/*.yml"
+    ],
+    "https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/dependabot-2.0.json": [
+      ".github/dependabot.yml"
+    ]
+  }
 }
