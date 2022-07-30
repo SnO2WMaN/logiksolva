@@ -4,3 +4,7 @@ packages = ["alejandra", "deno", "taplo-cli"]
 [[commands]]
 package = "treefmt"
 category = "formatter"
+
+[[env]]
+name = "PATH"
+eval = "$PATH:~/.deno/bin"
