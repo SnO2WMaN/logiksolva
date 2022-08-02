@@ -1,6 +1,6 @@
 import { assertEquals } from "std/testing/asserts.ts";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
-import { check } from "./mod.ts";
+import { check } from "./check.ts";
 
 Deno.test("propositional:fallancy:affirmingConsequent", () => {
   assertEquals(check(affirmingConsequent), false);

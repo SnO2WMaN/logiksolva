@@ -1,6 +1,6 @@
 import { green, red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { bold } from "std/fmt/colors.ts";
-import { checkValid, createFirstBranch, toBranch } from "./branch.ts";
+import { check } from "./check";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
 import {
   absorptiveAndOr,
@@ -33,7 +33,6 @@ import {
 } from "./tautology.ts";
 import { PropFormula } from "./types.ts";
 
-export const check = (f: PropFormula) => !checkValid(toBranch(createFirstBranch({ type: "NOT", in: f })));
 export const show = (f: PropFormula): string => {
   switch (f.type) {
     case "PROP":

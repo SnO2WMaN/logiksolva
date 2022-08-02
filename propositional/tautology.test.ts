@@ -26,7 +26,7 @@ import {
   simplificationLeft,
   simplificationRight,
 } from "./tautology.ts";
-import { check } from "./mod.ts";
+import { check } from "./check.ts";
 
 Deno.test("propositional:tautology:associativeAnd", () => {
   assertEquals(check(associativeAnd), true);
