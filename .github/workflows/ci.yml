@@ -16,6 +16,18 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - run: nix-shell --run "deno task test"
 
+  lint:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v17
+      - uses: cachix/cachix-action@v10
+        with:
+          name: sno2wman
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - run: nix-shell --run "deno task lint"
+
   treefmt:
     name: treefmt
     runs-on: ubuntu-latest
