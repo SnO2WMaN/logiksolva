@@ -1,5 +1,5 @@
 // <e1> := <e2> | <e2>↔<e1>
-// <e2> := <e3> | <e3>→<e2>
+// <e2> := <e3> | <e2>→<e3>
 // <e3> := <e4> | <e4>∨<e3>
 // <e4> := <pr> | <pr>∧<e4>
 // <pr> := <al> | ¬<pr> | (<e1>)
@@ -53,8 +53,8 @@ export const parseE2 = (f: string, fi = 0): PropFormula | null => {
   const i = f.indexOf("→", fi);
   if (i === -1) return parseE3(f);
 
-  const pre = parseE3(f.slice(0, i));
-  const pos = parseE2(f.slice(i + 1));
+  const pre = parseE2(f.slice(0, i));
+  const pos = parseE3(f.slice(i + 1));
 
   if (!!pre && !!pos) return ["IMP", pre, pos];
   return parseE2(f, i + 1);

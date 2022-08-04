@@ -45,7 +45,7 @@ Deno.test("parseE2:¬P→Q", () => {
 });
 Deno.test("parseE2:P→Q→R", () => {
   const actual = parseE2("P→Q→R");
-  const expected: PropFormula = ["IMP", ["PROP", "P"], ["IMP", ["PROP", "Q"], ["PROP", "R"]]];
+  const expected: PropFormula = ["IMP", ["IMP", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]];
   assertEquals(actual, expected);
 });
 Deno.test("parseE2:(P→Q)→(R→S)", () => {
