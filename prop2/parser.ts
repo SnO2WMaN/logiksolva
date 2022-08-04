@@ -31,8 +31,8 @@ export const parseE4 = (f: string, fi = 0): PropFormula | null => {
   const i = f.indexOf("∧", fi);
   if (i === -1) return parsePr(f);
 
-  const pre = parsePr(f.slice(0, i));
-  const pos = parseE4(f.slice(i + 1));
+  const pre = parseE4(f.slice(0, i));
+  const pos = parsePr(f.slice(i + 1));
 
   if (!!pre && !!pos) return ["AND", pre, pos];
   return parseE4(f, i + 1);
@@ -42,8 +42,8 @@ export const parseE3 = (f: string, fi = 0): PropFormula | null => {
   const i = f.indexOf("∨", fi);
   if (i === -1) return parseE4(f);
 
-  const pre = parseE4(f.slice(0, i));
-  const pos = parseE3(f.slice(i + 1));
+  const pre = parseE3(f.slice(0, i));
+  const pos = parseE4(f.slice(i + 1));
 
   if (!!pre && !!pos) return ["OR", pre, pos];
   return parseE3(f, i + 1);
@@ -53,8 +53,8 @@ export const parseE2 = (f: string, fi = 0): PropFormula | null => {
   const i = f.indexOf("→", fi);
   if (i === -1) return parseE3(f);
 
-  const pre = parseE2(f.slice(0, i));
-  const pos = parseE3(f.slice(i + 1));
+  const pre = parseE3(f.slice(0, i));
+  const pos = parseE2(f.slice(i + 1));
 
   if (!!pre && !!pos) return ["IMP", pre, pos];
   return parseE2(f, i + 1);
@@ -64,8 +64,8 @@ export const parseE1 = (f: string, fi = 0): PropFormula | null => {
   const i = f.indexOf("↔", fi);
   if (i === -1) return parseE2(f);
 
-  const pre = parseE2(f.slice(0, i));
-  const pos = parseE1(f.slice(i + 1));
+  const pre = parseE1(f.slice(0, i));
+  const pos = parseE2(f.slice(i + 1));
 
   if (!!pre && !!pos) return ["EQ", pre, pos];
   return parseE1(f, i + 1);

@@ -19,7 +19,7 @@ Deno.test("parseE1:¬P↔Q", () => {
 });
 Deno.test("parseE1:P↔Q↔R", () => {
   const actual = parseE1("P↔Q↔R");
-  const expected: PropFormula = ["EQ", ["PROP", "P"], ["EQ", ["PROP", "Q"], ["PROP", "R"]]];
+  const expected: PropFormula = ["EQ", ["EQ", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]];
   assertEquals(actual, expected);
 });
 Deno.test("parseE1:(P↔Q)↔(R↔S)", () => {
@@ -45,7 +45,7 @@ Deno.test("parseE2:¬P→Q", () => {
 });
 Deno.test("parseE2:P→Q→R", () => {
   const actual = parseE2("P→Q→R");
-  const expected: PropFormula = ["IMP", ["IMP", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]];
+  const expected: PropFormula = ["IMP", ["PROP", "P"], ["IMP", ["PROP", "Q"], ["PROP", "R"]]];
   assertEquals(actual, expected);
 });
 Deno.test("parseE2:(P→Q)→(R→S)", () => {
@@ -71,7 +71,7 @@ Deno.test("parseE3:¬P∨Q", () => {
 });
 Deno.test("parseE3:P∨Q∨R", () => {
   const actual = parseE3("P∨Q∨R");
-  const expected: PropFormula = ["OR", ["PROP", "P"], ["OR", ["PROP", "Q"], ["PROP", "R"]]];
+  const expected: PropFormula = ["OR", ["OR", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]];
   assertEquals(actual, expected);
 });
 Deno.test("parseE3:(P∨Q)∨(R∨S)", () => {
@@ -97,7 +97,7 @@ Deno.test("parseE4:¬P∧Q", () => {
 });
 Deno.test("parseE4:P∧Q∧R", () => {
   const actual = parseE4("P∧Q∧R");
-  const expected: PropFormula = ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]];
+  const expected: PropFormula = ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]];
   assertEquals(actual, expected);
 });
 Deno.test("parseE4:(P∧Q)∧(R∧S)", () => {
