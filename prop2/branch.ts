@@ -3,7 +3,7 @@ import { Eq, Imp, Or, Prop, PropFormula } from "./types.ts";
 
 export type PropsTable = Record<string, { 0?: true; 1?: true }>;
 export type Branch = {
-  // nodes: PropFormula[];
+  nodes: PropFormula[];
   stack: PropFormula[];
   skip: (Or | Imp | Eq)[];
   props: PropsTable;
@@ -16,6 +16,7 @@ export const evalBranch = (b: Branch): Branch => {
     if (f[0] === "PROP") {
       // P
       return evalBranch({
+        nodes: [...b.nodes, f],
         stack: rest,
         skip: b.skip,
         props: deepMerge(b.props, { [f[1]]: { 1: true } }),
@@ -24,6 +25,7 @@ export const evalBranch = (b: Branch): Branch => {
     } else if (f[0] === "NOT" && f[1][0] === "PROP") {
       // ¬P
       return evalBranch({
+        nodes: [...b.nodes, f],
         stack: rest,
         skip: b.skip,
         props: deepMerge(b.props, { [f[1][1]]: { 0: true } }),
@@ -32,6 +34,7 @@ export const evalBranch = (b: Branch): Branch => {
     } else if (f[0] === "OR" || f[0] === "IMP" || f[0] === "EQ") {
       // P∨Q, P→Q(=¬P∨Q), P↔Q(=(P∧Q)∨(¬P∨¬Q))
       return evalBranch({
+        nodes: [...b.nodes, f],
         stack: rest,
         skip: [...b.skip, f],
         props: b.props,
@@ -40,6 +43,7 @@ export const evalBranch = (b: Branch): Branch => {
     } else {
       // P∧Q, ¬(P∧Q), ¬(P∨Q), ¬¬P
       return evalBranch({
+        nodes: [...b.nodes, f],
         stack: [...rest, ...evalFormula(f)],
         skip: b.skip,
         props: b.props,
@@ -52,32 +56,47 @@ export const evalBranch = (b: Branch): Branch => {
     switch (f[0]) {
       case "OR":
         return {
+          nodes: b.nodes,
           stack: [],
           skip: [],
           props: b.props,
           junction: [
-            evalBranch({ stack: [f[1]], skip: rest, props: b.props, junction: null }),
-            evalBranch({ stack: [f[2]], skip: rest, props: b.props, junction: null }),
+            evalBranch({ nodes: [], stack: [f[1]], skip: rest, props: b.props, junction: null }),
+            evalBranch({ nodes: [], stack: [f[2]], skip: rest, props: b.props, junction: null }),
           ],
         };
       case "IMP":
         return {
+          nodes: b.nodes,
           stack: [],
           skip: [],
           props: b.props,
           junction: [
-            evalBranch({ stack: [["NOT", f[1]]], skip: rest, props: b.props, junction: null }),
-            evalBranch({ stack: [f[2]], skip: rest, props: b.props, junction: null }),
+            evalBranch({ nodes: [], stack: [["NOT", f[1]]], skip: rest, props: b.props, junction: null }),
+            evalBranch({ nodes: [], stack: [f[2]], skip: rest, props: b.props, junction: null }),
           ],
         };
       case "EQ":
         return {
+          nodes: b.nodes,
           stack: [],
           skip: [],
           props: b.props,
           junction: [
-            evalBranch({ stack: [["AND", f[1], f[2]]], skip: rest, props: b.props, junction: null }),
-            evalBranch({ stack: [["AND", ["NOT", f[1]], ["NOT", f[2]]]], skip: rest, props: b.props, junction: null }),
+            evalBranch({
+              nodes: [],
+              stack: [["AND", f[1], f[2]]],
+              skip: rest,
+              props: b.props,
+              junction: null,
+            }),
+            evalBranch({
+              nodes: [],
+              stack: [["AND", ["NOT", f[1]], ["NOT", f[2]]]],
+              skip: rest,
+              props: b.props,
+              junction: null,
+            }),
           ],
         };
     }
@@ -96,6 +115,11 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
           return [f[1][1]];
         case "AND":
           return [["OR", f[1][1], f[1][2]]];
+        case "EQ":
+          return [
+            ["OR", f[1][1], f[1][2]],
+            ["OR", ["NOT", f[1][1]], ["NOT", f[1][2]]],
+          ];
         case "OR":
           return [f[1][1], f[1][2]];
       }
@@ -103,3 +127,18 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
   }
   throw new Error("Must not be reached");
 };
+
+console.dir(
+  evalBranch({
+    nodes: [],
+    stack: [["NOT", [
+      "EQ",
+      ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
+      ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
+    ]]],
+    skip: [],
+    props: {},
+    junction: null,
+  }),
+  { depth: Number.MAX_SAFE_INTEGER },
+);
