@@ -1,5 +1,6 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { parseE1, parseE2, parseE3, parseE4, parseFormula, parsePr, PropFormula } from "./parser.ts";
+import { parseE1, parseE2, parseE3, parseE4, parseFormula, parsePr } from "./parser.ts";
+import { PropFormula } from "./types.ts";
 
 Deno.test("parseE1:P↔Q", () => {
   const actual = parseE1("P↔Q");

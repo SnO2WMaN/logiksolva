@@ -4,14 +4,8 @@
 // <e4> := <pr> | <pr>∧<e4>
 // <pr> := <al> | ¬<pr> | (<e1>)
 // <al> := [P, Q, R, ...]+
-export type Prop = ["PROP", string];
-export type Not = ["NOT", PropFormula];
-export type And = ["AND", PropFormula, PropFormula];
-export type Or = ["OR", PropFormula, PropFormula];
-export type Imp = ["IMP", PropFormula, PropFormula];
-export type Eq = ["EQ", PropFormula, PropFormula];
 
-export type PropFormula = Prop | Not | And | Or | Imp | Eq;
+import { PropFormula } from "./types.ts";
 
 export const parsePr = (f: string): PropFormula | null => {
   const prop = /^([a-zA-Z]+)$/.exec(f);
