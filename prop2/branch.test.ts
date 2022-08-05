@@ -132,14 +132,14 @@ Deno.test("evalBranch:stack:¬(P∧Q)", () => {
   const expected: Branch = {
     nodes: [
       ["NOT", ["AND", ["PROP", "P"], ["PROP", "Q"]]],
-      ["OR", ["PROP", "P"], ["PROP", "Q"]],
+      ["OR", ["NOT", ["PROP", "P"]], ["NOT", ["PROP", "Q"]]],
     ],
     stack: [],
     skip: [],
     props: {},
     junction: [
-      { nodes: [["PROP", "P"], ["TOP"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
-      { nodes: [["PROP", "Q"], ["TOP"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
+      { nodes: [["NOT", ["PROP", "P"]], ["TOP"]], stack: [], skip: [], props: { "P": { 0: true } }, junction: null },
+      { nodes: [["NOT", ["PROP", "Q"]], ["TOP"]], stack: [], skip: [], props: { "Q": { 0: true } }, junction: null },
     ],
   };
   assertEquals(actual, expected);
@@ -155,13 +155,13 @@ Deno.test("evalBranch:stack:¬(P∨Q)", () => {
   const expected: Branch = {
     nodes: [
       ["NOT", ["OR", ["PROP", "P"], ["PROP", "Q"]]],
-      ["PROP", "P"],
-      ["PROP", "Q"],
+      ["NOT", ["PROP", "P"]],
+      ["NOT", ["PROP", "Q"]],
       ["TOP"],
     ],
     stack: [],
     skip: [],
-    props: { "P": { 1: true }, "Q": { 1: true } },
+    props: { "P": { 0: true }, "Q": { 0: true } },
     junction: null,
   };
   assertEquals(actual, expected);
@@ -259,14 +259,14 @@ Deno.test("evalFormula:P∧Q", () => {
   );
 });
 Deno.test("evalFormula:¬(P∧Q)", () => {
-  const expected: PropFormula[] = [["OR", ["PROP", "P"], ["PROP", "Q"]]];
+  const expected: PropFormula[] = [["OR", ["NOT", ["PROP", "P"]], ["NOT", ["PROP", "Q"]]]];
   assertEquals(
     evalFormula(["NOT", ["AND", ["PROP", "P"], ["PROP", "Q"]]]),
     expected,
   );
 });
 Deno.test("evalFormula:¬(P∨Q)", () => {
-  const expected: PropFormula[] = [["PROP", "P"], ["PROP", "Q"]];
+  const expected: PropFormula[] = [["NOT", ["PROP", "P"]], ["NOT", ["PROP", "Q"]]];
   assertEquals(
     evalFormula(["NOT", ["OR", ["PROP", "P"], ["PROP", "Q"]]]),
     expected,
