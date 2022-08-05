@@ -1,4 +1,3 @@
-import { evalBranch } from "./branch.ts";
 import { PropFormula } from "./types.ts";
 
 // 後件肯定
