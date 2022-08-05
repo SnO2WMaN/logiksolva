@@ -117,7 +117,7 @@ export const evalBranch = (b: Branch): Branch => {
       nodes: [
         ...b.nodes,
         // last isn't ⊤ and ⊥, calc from prop table
-        Object.values(b.props).every((v) => !!v?.["0"] && !!v?.["1"]) ? ["BOT"] : ["TOP"],
+        Object.values(b.props).some((v) => v?.["0"] === true && v?.["1"] === true) ? ["BOT"] : ["TOP"],
       ],
     };
   }
@@ -132,7 +132,9 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
         case "NOT":
           return [f[1][1]];
         case "AND":
-          return [["OR", f[1][1], f[1][2]]];
+          return [["OR", ["NOT", f[1][1]], ["NOT", f[1][2]]]];
+        case "OR":
+          return [["NOT", f[1][1]], ["NOT", f[1][2]]];
         case "IMP":
           return [f[1][1], ["NOT", f[1][2]]];
         case "EQ":
@@ -140,8 +142,6 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
             ["OR", f[1][1], f[1][2]],
             ["OR", ["NOT", f[1][1]], ["NOT", f[1][2]]],
           ];
-        case "OR":
-          return [f[1][1], f[1][2]];
       }
     }
   }
