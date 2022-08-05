@@ -1,7 +1,9 @@
 import { green, red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { bold } from "std/fmt/colors.ts";
-import { check } from "./check";
+import { evalBranch } from "./branch.ts";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
+import { findTopOrBot } from "./find_top_or_bot.ts";
+import { show } from "./show.ts";
 import {
   absorptiveAndOr,
   absorptiveOrAnd,
@@ -33,25 +35,11 @@ import {
 } from "./tautology.ts";
 import { PropFormula } from "./types.ts";
 
-export const show = (f: PropFormula): string => {
-  switch (f.type) {
-    case "PROP":
-      return f.id;
-    case "NOT":
-      return `¬${show(f.in)}`;
-    case "AND":
-      return `(${show(f.left)}∧${show(f.right)})`;
-    case "OR":
-      return `(${show(f.left)}∨${show(f.right)})`;
-    case "IMPLICT":
-      return `(${show(f.left)}→${show(f.right)})`;
-    case "EQ":
-      return `(${show(f.left)}↔${show(f.right)})`;
-  }
-};
+const isValid = (f: PropFormula) =>
+  (findTopOrBot(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }))) === false;
 
 export const print = (f: PropFormula) => {
-  console.log(`${check(f) ? green("⊨") : red("⊭")} ${bold(show(f))}`);
+  console.log(`${isValid(f) ? green("⊨") : red("⊭")} ${bold(show(f))}`);
 };
 
 // トートロジー

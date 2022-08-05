@@ -2,7 +2,8 @@
   "tasks": {
     "dev": "deno run --allow-net --watch --import-map ./import_map.json ./mod.ts",
     "lint": "deno lint",
-    "test": "deno test --import-map ./import_map.json"
+    "test": "deno test --import-map ./import_map.json",
+    "play:prop": "deno run --import-map ./import_map.json ./prop/play.ts"
   },
   "fmt": {
     "options": {

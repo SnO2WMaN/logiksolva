@@ -32,16 +32,3 @@ export const mkFallancyFallancy = (
   psi: PropFormula,
 ): PropFormula => ["IMP", ["AND", ["IMP", phi, psi], ["NOT", phi]], ["NOT", psi]];
 export const fallancyFallancy: PropFormula = mkFallancyFallancy(["PROP", "P"], ["PROP", "Q"]);
-
-console.dir(
-  evalBranch({
-    stack: [["NOT", affirmingConsequent]],
-    nodes: [],
-    skip: [],
-    props: {},
-    junction: null,
-  }),
-  {
-    depth: Number.MAX_SAFE_INTEGER,
-  },
-);
