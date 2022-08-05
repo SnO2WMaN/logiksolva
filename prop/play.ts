@@ -2,7 +2,7 @@ import { green, red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { bold } from "std/fmt/colors.ts";
 import { evalBranch } from "./branch.ts";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
-import { findTopOrBot } from "./find_top_or_bot.ts";
+import { findTB } from "./find_tb.ts";
 import { show } from "./show.ts";
 import {
   absorptiveAndOr,
@@ -36,7 +36,7 @@ import {
 import { PropFormula } from "./types.ts";
 
 const isValid = (f: PropFormula) =>
-  (findTopOrBot(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }))) === false;
+  (findTB(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }), "TOP")) === false;
 
 export const print = (f: PropFormula) => {
   console.log(`${isValid(f) ? green("⊨") : red("⊭")} ${bold(show(f))}`);
