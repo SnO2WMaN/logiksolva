@@ -1,32 +1,32 @@
 import { oakCors } from "cors/mod.ts";
 import { Application, Router } from "oak/mod.ts";
 import { Logger } from "./logger.ts";
-import { createFirstBranch, toBranch } from "./propositional/branch.ts";
-import { parseFormula } from "./propositional/parse.ts";
+import { evalBranch } from "./prop2/branch.ts";
+import { findTopOrBot } from "./prop2/find_top_or_bot.ts";
+import { parseFormula } from "./prop2/parser.ts";
 
 const app = new Application();
 const router = new Router();
 
 router.get("/solve", ({ request, response }) => {
-  const formula = request.url.searchParams.get("formula");
-  if (formula === null) {
+  const reqFormula = request.url.searchParams.get("formula");
+  if (reqFormula === null) {
     response.status = 400;
     Logger.debug(`/solve formula is missing`);
     return;
   }
-  Logger.debug(`/solve given formula is ${formula}`);
-  const parsed = parseFormula(formula);
-  if (parsed === null) {
+  Logger.debug(`/solve given formula is ${reqFormula}`);
+  const formula = parseFormula(reqFormula);
+  if (formula === null) {
     response.status = 400;
-    Logger.debug(`/solve ${parsed} cannot be parsed.`);
+    Logger.debug(`/solve ${formula} cannot be parsed.`);
     return;
   }
 
-  const branch = toBranch(
-    createFirstBranch({ type: "NOT", in: parsed }),
-  );
+  const branch = evalBranch({ stack: [["NOT", formula]], nodes: [], skip: [], props: {}, junction: null });
+  const valid = findTopOrBot(branch) === false;
 
-  response.body = branch;
+  response.body = { branch, valid };
   return;
 });
 app.use(router.routes());
