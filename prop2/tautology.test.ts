@@ -1,5 +1,6 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { isValid } from "./is_valid.ts";
+import { evalBranch } from "./branch.ts";
+import { findTopOrBot } from "./find_top_or_bot.ts";
 import {
   absorptiveAndOr,
   absorptiveOrAnd,
@@ -29,6 +30,10 @@ import {
   simplificationRight,
   transitive,
 } from "./tautology.ts";
+import { PropFormula } from "./types.ts";
+
+const isValid = (f: PropFormula) =>
+  (findTopOrBot(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }))) === false;
 
 Deno.test("tautology:associativeAnd", () => {
   assertEquals(isValid(associativeAnd), true);

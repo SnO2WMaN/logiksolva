@@ -1,5 +1,4 @@
 import { evalBranch } from "./branch.ts";
-import { deep } from "./is_valid.ts";
 import { PropFormula } from "./types.ts";
 
 // 後件肯定
@@ -45,14 +44,4 @@ console.dir(
   {
     depth: Number.MAX_SAFE_INTEGER,
   },
-);
-
-console.log(
-  deep(evalBranch({
-    stack: [["NOT", affirmingConsequent]],
-    nodes: [],
-    skip: [],
-    props: {},
-    junction: null,
-  })) === false,
 );
