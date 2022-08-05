@@ -50,7 +50,7 @@ export const evalBranch = (b: Branch): Branch => {
         junction: null,
       });
     } else {
-      // P∧Q, ¬(P∧Q), ¬(P∨Q), ¬¬P
+      // P∧Q, ¬¬P, ¬(P∧Q), ¬(P∨Q), ¬(P→Q), ¬(P↔Q)
       return evalBranch({
         nodes: [...b.nodes, f],
         stack: [...rest, ...evalFormula(f)],
@@ -133,6 +133,8 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
           return [f[1][1]];
         case "AND":
           return [["OR", f[1][1], f[1][2]]];
+        case "IMP":
+          return [f[1][1], ["NOT", f[1][2]]];
         case "EQ":
           return [
             ["OR", f[1][1], f[1][2]],
@@ -145,18 +147,3 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
   }
   throw new Error("Must not be reached");
 };
-
-console.dir(
-  evalBranch({
-    nodes: [],
-    stack: [["NOT", [
-      "EQ",
-      ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
-      ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
-    ]]],
-    skip: [],
-    props: {},
-    junction: null,
-  }),
-  { depth: Number.MAX_SAFE_INTEGER },
-);
