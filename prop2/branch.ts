@@ -31,6 +31,15 @@ export const evalBranch = (b: Branch): Branch => {
         props: deepMerge(b.props, { [f[1][1]]: { 0: true } }),
         junction: null,
       });
+    } else if (f[0] === "TOP" || f[0] === "BOT") {
+      // ⊤, ⊥
+      return evalBranch({
+        nodes: [...b.nodes, f],
+        stack: rest,
+        skip: b.skip,
+        props: b.props,
+        junction: null,
+      });
     } else if (f[0] === "OR" || f[0] === "IMP" || f[0] === "EQ") {
       // P∨Q, P→Q(=¬P∨Q), P↔Q(=(P∧Q)∨(¬P∨¬Q))
       return evalBranch({
@@ -101,7 +110,16 @@ export const evalBranch = (b: Branch): Branch => {
         };
     }
   } else {
-    return b;
+    const lastNode = b.nodes.at(-1);
+    if (lastNode?.[0] === "TOP" || lastNode?.[0] === "BOT") return b;
+    return {
+      ...b,
+      nodes: [
+        ...b.nodes,
+        // last isn't ⊤ and ⊥, calc from prop table
+        Object.values(b.props).every((v) => !!v?.["0"] && !!v?.["1"]) ? ["BOT"] : ["TOP"],
+      ],
+    };
   }
 };
 

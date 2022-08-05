@@ -7,4 +7,4 @@ export type Or = ["OR", PropFormula, PropFormula];
 export type Imp = ["IMP", PropFormula, PropFormula];
 export type Eq = ["EQ", PropFormula, PropFormula];
 
-export type PropFormula = Prop | Not | And | Or | Imp | Eq;
+export type PropFormula = Top | Bot | Prop | Not | And | Or | Imp | Eq;

@@ -4,16 +4,56 @@ import { PropFormula } from "./types.ts";
 
 Deno.test("evalBranch:stack:P", () => {
   const actual = evalBranch({ nodes: [], stack: [["PROP", "P"]], skip: [], props: {}, junction: null });
-  const expected: Branch = { nodes: [["PROP", "P"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null };
+  const expected: Branch = {
+    nodes: [["PROP", "P"], ["TOP"]],
+    stack: [],
+    skip: [],
+    props: { "P": { 1: true } },
+    junction: null,
+  };
   assertEquals(actual, expected);
 });
 Deno.test("evalBranch:stack:¬P", () => {
   const actual = evalBranch({ nodes: [], stack: [["NOT", ["PROP", "P"]]], skip: [], props: {}, junction: null });
   const expected: Branch = {
-    nodes: [["NOT", ["PROP", "P"]]],
+    nodes: [["NOT", ["PROP", "P"]], ["TOP"]],
     stack: [],
     skip: [],
     props: { "P": { 0: true } },
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
+Deno.test("evalBranch:stack:⊤", () => {
+  const actual = evalBranch({
+    nodes: [],
+    stack: [["TOP"]],
+    skip: [],
+    props: {},
+    junction: null,
+  });
+  const expected: Branch = {
+    nodes: [["TOP"]],
+    stack: [],
+    skip: [],
+    props: {},
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
+Deno.test("evalBranch:stack:⊥", () => {
+  const actual = evalBranch({
+    nodes: [],
+    stack: [["BOT"]],
+    skip: [],
+    props: {},
+    junction: null,
+  });
+  const expected: Branch = {
+    nodes: [["BOT"]],
+    stack: [],
+    skip: [],
+    props: {},
     junction: null,
   };
   assertEquals(actual, expected);
@@ -30,6 +70,7 @@ Deno.test("evalBranch:stack:¬¬P", () => {
     nodes: [
       ["NOT", ["NOT", ["PROP", "P"]]],
       ["PROP", "P"],
+      ["TOP"],
     ],
     stack: [],
     skip: [],
@@ -51,6 +92,7 @@ Deno.test("evalBranch:stack:P∧Q", () => {
       ["AND", ["PROP", "P"], ["PROP", "Q"]],
       ["PROP", "P"],
       ["PROP", "Q"],
+      ["TOP"],
     ],
     stack: [],
     skip: [],
@@ -73,8 +115,8 @@ Deno.test("evalBranch:stack:P∨Q", () => {
     skip: [],
     props: {},
     junction: [
-      { nodes: [["PROP", "P"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
-      { nodes: [["PROP", "Q"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
+      { nodes: [["PROP", "P"], ["TOP"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
+      { nodes: [["PROP", "Q"], ["TOP"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
     ],
   };
   assertEquals(actual, expected);
@@ -96,8 +138,8 @@ Deno.test("evalBranch:stack:¬(P∧Q)", () => {
     skip: [],
     props: {},
     junction: [
-      { nodes: [["PROP", "P"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
-      { nodes: [["PROP", "Q"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
+      { nodes: [["PROP", "P"], ["TOP"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
+      { nodes: [["PROP", "Q"], ["TOP"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
     ],
   };
   assertEquals(actual, expected);
@@ -115,6 +157,7 @@ Deno.test("evalBranch:stack:¬(P∨Q)", () => {
       ["NOT", ["OR", ["PROP", "P"], ["PROP", "Q"]]],
       ["PROP", "P"],
       ["PROP", "Q"],
+      ["TOP"],
     ],
     stack: [],
     skip: [],
@@ -138,8 +181,8 @@ Deno.test("evalBranch:skip:P∨Q", () => {
     skip: [],
     props: {},
     junction: [
-      { nodes: [["PROP", "P"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
-      { nodes: [["PROP", "Q"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
+      { nodes: [["PROP", "P"], ["TOP"]], stack: [], skip: [], props: { "P": { 1: true } }, junction: null },
+      { nodes: [["PROP", "Q"], ["TOP"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
     ],
   };
   assertEquals(actual, expected);
@@ -159,8 +202,8 @@ Deno.test("evalBranch:skip:P→Q", () => {
     skip: [],
     props: {},
     junction: [
-      { nodes: [["NOT", ["PROP", "P"]]], stack: [], skip: [], props: { "P": { 0: true } }, junction: null },
-      { nodes: [["PROP", "Q"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
+      { nodes: [["NOT", ["PROP", "P"]], ["TOP"]], stack: [], skip: [], props: { "P": { 0: true } }, junction: null },
+      { nodes: [["PROP", "Q"], ["TOP"]], stack: [], skip: [], props: { "Q": { 1: true } }, junction: null },
     ],
   };
   assertEquals(actual, expected);
@@ -184,6 +227,7 @@ Deno.test("evalBranch:skip:P↔Q", () => {
           ["AND", ["PROP", "P"], ["PROP", "Q"]],
           ["PROP", "P"],
           ["PROP", "Q"],
+          ["TOP"],
         ],
         stack: [],
         skip: [],
@@ -195,70 +239,7 @@ Deno.test("evalBranch:skip:P↔Q", () => {
           ["AND", ["NOT", ["PROP", "P"]], ["NOT", ["PROP", "Q"]]],
           ["NOT", ["PROP", "P"]],
           ["NOT", ["PROP", "Q"]],
-        ],
-        stack: [],
-        skip: [],
-        props: { "P": { 0: true }, "Q": { 0: true } },
-        junction: null,
-      },
-    ],
-  };
-  assertEquals(actual, expected);
-});
-
-Deno.test("evalBranch:(P∧Q)∧R↔P∧(Q∧R)", () => {
-  const actual = evalBranch({
-    nodes: [
-      [
-        "EQ",
-        ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
-        ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
-      ],
-    ],
-    stack: [],
-    skip: [["EQ", ["PROP", "P"], ["PROP", "Q"]]],
-    props: {},
-    junction: null,
-  });
-  const expected: Branch = {
-    nodes: [],
-    stack: [],
-    skip: [],
-    props: {},
-    junction: [
-      {
-        nodes: [
-          [
-            "AND",
-            ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
-            ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
-          ],
-          ["AND", ["AND", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
-          ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
-          ["AND", ["PROP", "P"], ["PROP", "Q"]],
-          ["PROP", "R"],
-          ["PROP", "P"],
-          ["PROP", "Q"],
-          ["PROP", "P"],
-          ["AND", ["PROP", "Q"], ["PROP", "R"]],
-          ["PROP", "Q"],
-          ["PROP", "R"],
-          ["AND", ["PROP", "P"], ["AND", ["PROP", "Q"], ["PROP", "R"]]],
-          ["PROP", "P"],
-          ["AND", ["PROP", "Q"], ["PROP", "R"]],
-          ["PROP", "Q"],
-          ["PROP", "R"],
-        ],
-        stack: [],
-        skip: [],
-        props: { "P": { 1: true }, "Q": { 1: true } },
-        junction: null,
-      },
-      {
-        nodes: [
-          ["AND", ["NOT", ["PROP", "P"]], ["NOT", ["PROP", "Q"]]],
-          ["NOT", ["PROP", "P"]],
-          ["NOT", ["PROP", "Q"]],
+          ["TOP"],
         ],
         stack: [],
         skip: [],
