@@ -1,11 +1,11 @@
 import { assertEquals } from "std/testing/asserts.ts";
 import { evalBranch } from "./branch.ts";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
-import { findTopOrBot } from "./find_top_or_bot.ts";
+import { findTB } from "./find_tb.ts";
 import { PropFormula } from "./types.ts";
 
 const isNotValid = (f: PropFormula) =>
-  (findTopOrBot(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }))) === true;
+  (findTB(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }), "TOP")) === true;
 
 Deno.test("fallancy:affirmingConsequent", () => {
   assertEquals(isNotValid(affirmingConsequent), true);
