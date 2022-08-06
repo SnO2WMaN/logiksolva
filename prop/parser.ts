@@ -11,14 +11,14 @@ export const parsePr = (f: string): PropFormula | null => {
   const prop = /^([a-zA-Z]+)$/.exec(f);
   if (prop) return ["PROP", prop[1]];
 
-  const not = /¬(.+)/.exec(f);
+  const not = /^¬(.+)$/.exec(f);
   if (not) {
     const inner = parsePr(not[1]);
     if (!inner) return null;
     return ["NOT", inner];
   }
 
-  const form = /\((.+)\)/.exec(f);
+  const form = /^\((.+)\)$/.exec(f);
   if (form) {
     const inner = parseE1(form[1]);
     if (!inner) return null;

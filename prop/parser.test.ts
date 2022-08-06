@@ -160,3 +160,12 @@ Deno.test("parse:(P∧Q)∧R↔P∧(Q∧R)", () => {
   ];
   assertEquals(actual, expected);
 });
+Deno.test("parse:(P→Q)↔(¬Q→¬P)", () => {
+  const actual = parseFormula("(P→Q)↔(¬Q→¬P)");
+  const expected: PropFormula = [
+    "EQ",
+    ["IMP", ["PROP", "P"], ["PROP", "Q"]],
+    ["IMP", ["NOT", ["PROP", "Q"]], ["NOT", ["PROP", "P"]]],
+  ];
+  assertEquals(actual, expected);
+});
