@@ -8,6 +8,12 @@
 import { PropFormula } from "./types.ts";
 
 export const parsePr = (f: string): PropFormula | null => {
+  const top = /^⊤$/.exec(f);
+  if (top) return ["TOP"];
+
+  const bot = /^⊥$/.exec(f);
+  if (bot) return ["BOT"];
+
   const prop = /^([a-zA-Z]+)$/.exec(f);
   if (prop) return ["PROP", prop[1]];
 

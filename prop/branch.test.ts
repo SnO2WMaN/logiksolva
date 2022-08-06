@@ -58,6 +58,40 @@ Deno.test("evalBranch:stack:⊥", () => {
   };
   assertEquals(actual, expected);
 });
+Deno.test("evalBranch:stack:¬⊤", () => {
+  const actual = evalBranch({
+    nodes: [],
+    stack: [["NOT", ["TOP"]]],
+    skip: [],
+    props: {},
+    junction: null,
+  });
+  const expected: Branch = {
+    nodes: [["NOT", ["TOP"]], ["BOT"]],
+    stack: [],
+    skip: [],
+    props: {},
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
+Deno.test("evalBranch:stack:¬⊥", () => {
+  const actual = evalBranch({
+    nodes: [],
+    stack: [["NOT", ["BOT"]]],
+    skip: [],
+    props: {},
+    junction: null,
+  });
+  const expected: Branch = {
+    nodes: [["NOT", ["BOT"]], ["TOP"]],
+    stack: [],
+    skip: [],
+    props: {},
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
 Deno.test("evalBranch:stack:¬¬P", () => {
   const actual = evalBranch({
     nodes: [],
