@@ -129,6 +129,10 @@ export const evalFormula = (f: Exclude<PropFormula, Prop | Or>): PropFormula[] =
       return [f[1], f[2]];
     case "NOT": {
       switch (f[1][0]) {
+        case "TOP":
+          return [["BOT"]];
+        case "BOT":
+          return [["TOP"]];
         case "NOT":
           return [f[1][1]];
         case "AND":
