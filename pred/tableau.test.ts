@@ -1,4 +1,4 @@
-import { evalTableau, makeAnyVariable, Tableau } from "./tableau.ts";
+import { evalTableau, makeAnyVariable, makeUniqueVariable, Tableau } from "./tableau.ts";
 import { assertEquals } from "std/testing/asserts.ts";
 
 Deno.test("makeAnyVariable:already_exists_variable:1", () => {
@@ -29,6 +29,38 @@ Deno.test("makeAnyVariable:already_exists_variable:2", () => {
 
 Deno.test("makeAnyVariable:exists_no_variables", () => {
   assertEquals(makeAnyVariable([]), ["VAR", "τ"]);
+});
+
+Deno.test("makeUniqueVariable:exists_no_variables", () => {
+  assertEquals(makeUniqueVariable([]), ["VAR", "ζ0"]);
+});
+
+Deno.test("makeUniqueVariable:not_zeta_in_formulas", () => {
+  assertEquals(
+    makeUniqueVariable([
+      ["PRED", "F", ["VAR", "x"]],
+    ]),
+    ["VAR", "ζ0"],
+  );
+});
+
+Deno.test("makeUniqueVariable:zeta_in_formulas:1", () => {
+  assertEquals(
+    makeUniqueVariable([
+      ["PRED", "F", ["VAR", "ζ0"]],
+    ]),
+    ["VAR", "ζ1"],
+  );
+});
+
+Deno.test("makeUniqueVariable:zeta_in_formulas:2", () => {
+  assertEquals(
+    makeUniqueVariable([
+      ["PRED", "F", ["VAR", "ζ0"]],
+      ["PRED", "G", ["VAR", "ζ1"]],
+    ]),
+    ["VAR", "ζ2"],
+  );
 });
 
 Deno.test("evalTableau:stack:F(x)", () => {

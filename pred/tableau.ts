@@ -34,8 +34,17 @@ export const makeAnyVariable = (fs: Formula[]): Term => {
 
 // fsの中の論理式φについてζ∉fv(φ)なζを生成
 export const makeUniqueVariable = (fs: Formula[]): Variable => {
-  return ["VAR", "ζ1"];
+  const next = fs
+    .map((f) => getFreeVariablesFromFormula(f))
+    .reduce((p, c) => [...p, ...c], [])
+    .filter(([, vi]) => /^ζ\d+$/.test(vi))
+    .map(([, vi]) => parseInt(vi.substring(1)))
+    .at(-1);
+  console.log(next);
+  if (next === undefined) return ["VAR", `ζ0`];
+  return ["VAR", `ζ${next + 1}`];
 };
+
 export const evalTableau = (t: Tableau): Tableau => {
   const contract = t.stack.find((sf) => t.nodes.findIndex((nf) => isSameFormula(sf, ["NOT", nf])) !== -1);
   if (contract) {
