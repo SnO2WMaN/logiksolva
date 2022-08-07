@@ -9,6 +9,33 @@ export type Tableau = {
 
 export const isSameFormula = (f1: Formula, f2: Formula): boolean => isDeepStrictEqual(f1, f2);
 
+// fsの中の論理式φに存在する適当な項，存在しないならτ
+export const makeAnyVariable = (fs: Formula[]): Term => {
+  if (fs.length === 0) return ["VAR", "τ"];
+  const [headFormula, ...restFormulas] = fs;
+  switch (headFormula[0]) {
+    case "PRED":
+      return headFormula[2];
+    case "FORALL":
+    case "ANY":
+      return headFormula[1];
+    case "TOP":
+    case "BOT":
+      return makeAnyVariable(restFormulas);
+    case "NOT":
+      return makeAnyVariable([headFormula[1], ...restFormulas]);
+    case "AND":
+    case "OR":
+    case "IMP":
+    case "EQ":
+      return makeAnyVariable([headFormula[1], headFormula[2], ...restFormulas]);
+  }
+};
+
+// fsの中の論理式φについてζ∉fv(φ)なζを生成
+export const makeUniqueVariable = (fs: Formula[]): Variable => {
+  return ["VAR", "ζ1"];
+};
 export const evalTableau = (t: Tableau): Tableau => {
   const contract = t.stack.find((sf) => t.nodes.findIndex((nf) => isSameFormula(sf, ["NOT", nf])) !== -1);
   if (contract) {

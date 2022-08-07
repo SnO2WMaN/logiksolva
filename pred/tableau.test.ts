@@ -1,5 +1,35 @@
-import { evalTableau, Tableau } from "./tableau.ts";
+import { evalTableau, makeAnyVariable, Tableau } from "./tableau.ts";
 import { assertEquals } from "std/testing/asserts.ts";
+
+Deno.test("makeAnyVariable:already_exists_variable:1", () => {
+  assertEquals(
+    makeAnyVariable(
+      [
+        ["PRED", "F", ["VAR", "x"]],
+      ],
+    ),
+    ["VAR", "x"],
+  );
+});
+
+Deno.test("makeAnyVariable:already_exists_variable:2", () => {
+  assertEquals(
+    makeAnyVariable(
+      [
+        [
+          "OR",
+          ["PRED", "F", ["VAR", "x"]],
+          ["PRED", "G", ["VAR", "y"]],
+        ],
+      ],
+    ),
+    ["VAR", "x"],
+  );
+});
+
+Deno.test("makeAnyVariable:exists_no_variables", () => {
+  assertEquals(makeAnyVariable([]), ["VAR", "τ"]);
+});
 
 Deno.test("evalTableau:stack:F(x)", () => {
   const actual = evalTableau({
