@@ -15,6 +15,10 @@ export const showFormula = (f: Formula): string => {
   switch (f[0]) {
     case "PRED":
       return `${f[1]}(${showTerm(f[2])})`;
+    case "TOP":
+      return "⊤";
+    case "BOT":
+      return "⊥";
     case "NOT":
       return `¬${showFormula(f[1])}`;
     case "AND":

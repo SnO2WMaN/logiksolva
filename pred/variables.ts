@@ -19,6 +19,9 @@ export const getFreeVariablesFromFormula = (f: Formula): Variable[] => {
   switch (f[0]) {
     case "PRED":
       return uniqVariables([...getFreeVariablesFromTerm(f[2])]);
+    case "TOP":
+    case "BOT":
+      return [];
     case "NOT":
       return uniqVariables([...getFreeVariablesFromFormula(f[1])]);
     case "AND":
@@ -37,6 +40,9 @@ export const getBoundVariablesFromTerm = (_: Term): Variable[] => [];
 export const getBoundVariablesFromFormula = (f: Formula): Variable[] => {
   switch (f[0]) {
     case "PRED":
+      return [];
+    case "TOP":
+    case "BOT":
       return [];
     case "NOT":
       return uniqVariables([...getBoundVariablesFromFormula(f[1])]);

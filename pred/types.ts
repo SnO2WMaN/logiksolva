@@ -13,6 +13,8 @@ export type Operator = ["OP", string, Term];
 export type Predicate = ["PRED", string, Term];
 
 // 真理関数
+export type Top = ["TOP"];
+export type Bot = ["BOT"];
 export type Not = ["NOT", Formula];
 export type And = ["AND", Formula, Formula];
 export type Or = ["OR", Formula, Formula];
@@ -27,4 +29,4 @@ export type Any = ["ANY", Variable, Formula];
 export type Term = Name | Variable | Operator;
 
 // 論理式
-export type Formula = Predicate | Not | And | Or | Imp | Eq | ForAll | Any;
+export type Formula = Predicate | Top | Bot | Not | And | Or | Imp | Eq | ForAll | Any;
