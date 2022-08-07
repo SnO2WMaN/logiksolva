@@ -57,3 +57,40 @@ export const getBoundVariablesFromFormula = (f: Formula): Variable[] => {
       return uniqVariables([...getBoundVariablesFromFormula(f[2]), f[1]]);
   }
 };
+
+export const substituteToTerm = (t: Term, from: Variable, to: Term): Term => {
+  switch (t[0]) {
+    case "NAME":
+      return t;
+    case "VAR":
+      if (t[1] === from[1]) return to;
+      else return t;
+    case "OP":
+      return ["OP", t[1], substituteToTerm(t[2], from, to)];
+  }
+};
+
+export const substituteToFormula = (f: Formula, from: Variable, to: Term): Formula => {
+  switch (f[0]) {
+    case "PRED":
+      return ["PRED", f[1], substituteToTerm(f[2], from, to)];
+    case "TOP":
+    case "BOT":
+      return f;
+    case "NOT":
+      return [f[0], substituteToFormula(f[1], from, to)];
+    case "AND":
+    case "OR":
+    case "IMP":
+    case "EQ":
+      return [f[0], substituteToFormula(f[1], from, to), substituteToFormula(f[2], from, to)];
+    case "FORALL":
+    case "ANY":
+      if (
+        getFreeVariablesFromFormula(f[2]).findIndex(([, vi]) => vi === from[1]) === -1 ||
+        getFreeVariablesFromTerm(to).findIndex(([, vi]) => vi === f[1][1]) === -1
+      ) {
+        return [f[0], f[1], substituteToFormula(f[2], from, to)];
+      } else return f;
+  }
+};

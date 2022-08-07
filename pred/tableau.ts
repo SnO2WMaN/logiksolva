@@ -1,5 +1,6 @@
 import { isDeepStrictEqual } from "std/node/util.ts";
-import { Formula } from "./types.ts";
+import { Formula, Term, Variable } from "./types.ts";
+import { getFreeVariablesFromFormula, substituteToFormula } from "./variables.ts";
 
 export type Tableau = {
   nodes: Formula[];
@@ -7,6 +8,7 @@ export type Tableau = {
   junction: null | [Tableau, Tableau];
 };
 
+// TODO: ∧, ∨の順序を考慮した同一性チェック
 export const isSameFormula = (f1: Formula, f2: Formula): boolean => isDeepStrictEqual(f1, f2);
 
 // fsの中の論理式φに存在する適当な項，存在しないならτ
@@ -58,15 +60,43 @@ export const evalTableau = (t: Tableau): Tableau => {
           stack: rest,
           junction: null,
         });
+      case "FORALL":
+        return evalTableau({
+          nodes: [...t.nodes, head],
+          stack: [...rest, substituteToFormula(head[2], head[1], makeAnyVariable(t.nodes))],
+          junction: null,
+        });
+      case "ANY":
+        return evalTableau({
+          nodes: [...t.nodes, head],
+          stack: [...rest, substituteToFormula(head[2], head[1], makeUniqueVariable(t.nodes))],
+          junction: null,
+        });
       case "TOP":
       case "BOT":
         return t;
-      case "NOT":
-        return evalTableau({
-          nodes: [...t.nodes, head],
-          stack: [...rest, head[1]],
-          junction: null,
-        });
+      case "NOT": {
+        switch (head[1][0]) {
+          case "FORALL":
+            return evalTableau({
+              nodes: [...t.nodes, head],
+              stack: [...rest, substituteToFormula(head[1][2], head[1][1], makeUniqueVariable(t.nodes))],
+              junction: null,
+            });
+          case "ANY":
+            return evalTableau({
+              nodes: [...t.nodes, head],
+              stack: [...rest, substituteToFormula(head[1][2], head[1][1], makeAnyVariable(t.nodes))],
+              junction: null,
+            });
+          default:
+            return evalTableau({
+              nodes: [...t.nodes, head],
+              stack: [...rest, head[1]],
+              junction: null,
+            });
+        }
+      }
       case "AND":
         return evalTableau({
           nodes: [...t.nodes, head],

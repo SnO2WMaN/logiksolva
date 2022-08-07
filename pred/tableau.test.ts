@@ -63,7 +63,7 @@ Deno.test("makeUniqueVariable:zeta_in_formulas:2", () => {
   );
 });
 
-Deno.test("evalTableau:stack:F(x)", () => {
+Deno.test("evalTableau:F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -82,7 +82,7 @@ Deno.test("evalTableau:stack:F(x)", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("evalTableau:stack:¬F(x)", () => {
+Deno.test("evalTableau:¬F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -105,7 +105,7 @@ Deno.test("evalTableau:stack:¬F(x)", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("evalTableau:stack:F(x)∧G(x)", () => {
+Deno.test("evalTableau:F(x)∧G(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -129,7 +129,7 @@ Deno.test("evalTableau:stack:F(x)∧G(x)", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("evalTableau:stack:F(x)∨G(x)", () => {
+Deno.test("evalTableau:F(x)∨G(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -163,7 +163,7 @@ Deno.test("evalTableau:stack:F(x)∨G(x)", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("evalTableau:stack:F(x),¬F(x)", () => {
+Deno.test("evalTableau:F(x),¬F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -184,7 +184,7 @@ Deno.test("evalTableau:stack:F(x),¬F(x)", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("evalTableau:stack:∀x.F(x)", () => {
+Deno.test("evalTableau:∀x.F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -195,13 +195,36 @@ Deno.test("evalTableau:stack:∀x.F(x)", () => {
   const expected: Tableau = {
     nodes: [
       ["FORALL", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
+      ["PRED", "F", ["VAR", "τ"]],
+      ["TOP"],
     ],
     stack: [],
     junction: null,
   };
   assertEquals(actual, expected);
 });
-Deno.test("evalTableau:stack:∃x.F(x)", () => {
+
+Deno.test("evalTableau:¬∀x.F(x)", () => {
+  const actual = evalTableau({
+    nodes: [],
+    stack: [
+      ["NOT", ["FORALL", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+    ],
+    junction: null,
+  });
+  const expected: Tableau = {
+    nodes: [
+      ["NOT", ["FORALL", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["PRED", "F", ["VAR", "ζ0"]],
+      ["TOP"],
+    ],
+    stack: [],
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
+
+Deno.test("evalTableau:∃x.F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
@@ -212,6 +235,27 @@ Deno.test("evalTableau:stack:∃x.F(x)", () => {
   const expected: Tableau = {
     nodes: [
       ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
+      ["PRED", "F", ["VAR", "ζ0"]],
+      ["TOP"],
+    ],
+    stack: [],
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
+Deno.test("evalTableau:¬∃x.F(x)", () => {
+  const actual = evalTableau({
+    nodes: [],
+    stack: [
+      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+    ],
+    junction: null,
+  });
+  const expected: Tableau = {
+    nodes: [
+      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["PRED", "F", ["VAR", "τ"]],
+      ["TOP"],
     ],
     stack: [],
     junction: null,
