@@ -1,4 +1,4 @@
-import { deepMerge } from "std/collections/mod.ts";
+import { deepMerge } from "std/collections/deep_merge.ts";
 import { Eq, Imp, Or, Prop, PropFormula } from "./types.ts";
 
 export type PropsTable = Record<string, { 0?: true; 1?: true }>;
