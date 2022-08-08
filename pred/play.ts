@@ -14,7 +14,7 @@ console.log(showFormula(
 
 console.log(showFormula(
   ["NOT", [
-    "ANY",
+    "EXISTS",
     ["VAR", "x"],
     [
       "OR",

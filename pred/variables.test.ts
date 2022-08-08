@@ -39,9 +39,9 @@ Deno.test("getFreeVariablesFromFormula:forall", () => {
   assertEquals(actual, expected);
 });
 
-Deno.test("getFreeVariablesFromFormula:any", () => {
+Deno.test("getFreeVariablesFromFormula:exists", () => {
   // fv("∃x.F(x)") = {}
-  const actual = getFreeVariablesFromFormula(["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]);
+  const actual = getFreeVariablesFromFormula(["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]);
   const expected: Variable[] = [];
   assertEquals(actual, expected);
 });

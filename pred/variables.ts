@@ -30,7 +30,7 @@ export const getFreeVariablesFromFormula = (f: Formula): Variable[] => {
     case "EQ":
       return uniqVariables([...getFreeVariablesFromFormula(f[1]), ...getFreeVariablesFromFormula(f[2])]);
     case "FORALL":
-    case "ANY":
+    case "EXISTS":
       // fv(∀x.φ) = fv(φ) - {x}, ∃の場合も同様
       return uniqVariables([...getFreeVariablesFromFormula(f[2])].filter(([, id]) => id !== f[1][1]));
   }
@@ -52,7 +52,7 @@ export const getBoundVariablesFromFormula = (f: Formula): Variable[] => {
     case "EQ":
       return uniqVariables([...getBoundVariablesFromFormula(f[1]), ...getBoundVariablesFromFormula(f[2])]);
     case "FORALL":
-    case "ANY":
+    case "EXISTS":
       // bv(∀x.φ) = bv(φ) + {x}, ∃の場合も同様
       return uniqVariables([...getBoundVariablesFromFormula(f[2]), f[1]]);
   }
@@ -85,7 +85,7 @@ export const substituteToFormula = (f: Formula, from: Variable, to: Term): Formu
     case "EQ":
       return [f[0], substituteToFormula(f[1], from, to), substituteToFormula(f[2], from, to)];
     case "FORALL":
-    case "ANY":
+    case "EXISTS":
       if (
         getFreeVariablesFromFormula(f[2]).findIndex(([, vi]) => vi === from[1]) === -1 ||
         getFreeVariablesFromTerm(to).findIndex(([, vi]) => vi === f[1][1]) === -1

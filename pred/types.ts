@@ -21,12 +21,15 @@ export type Or = ["OR", Formula, Formula];
 export type Imp = ["IMP", Formula, Formula];
 export type Eq = ["EQ", Formula, Formula];
 
+// 特殊ケース
+export type NotPredicate = ["NOT", Predicate];
+
 // 量化子
 export type ForAll = ["FORALL", Variable, Formula];
-export type Any = ["ANY", Variable, Formula];
+export type Exists = ["EXISTS", Variable, Formula];
 
 // 項
 export type Term = Name | Variable | Operator;
 
 // 論理式
-export type Formula = Predicate | Top | Bot | Not | And | Or | Imp | Eq | ForAll | Any;
+export type Formula = Predicate | Top | Bot | Not | And | Or | Imp | Eq | ForAll | Exists;

@@ -228,13 +228,13 @@ Deno.test("evalTableau:∃x.F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
-      ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
+      ["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
     ],
     junction: null,
   });
   const expected: Tableau = {
     nodes: [
-      ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
+      ["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]],
       ["PRED", "F", ["VAR", "ζ0"]],
       ["TOP"],
     ],
@@ -247,13 +247,13 @@ Deno.test("evalTableau:¬∃x.F(x)", () => {
   const actual = evalTableau({
     nodes: [],
     stack: [
-      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["NOT", ["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
     ],
     junction: null,
   });
   const expected: Tableau = {
     nodes: [
-      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["NOT", ["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
       ["PRED", "F", ["VAR", "τ"]],
       ["TOP"],
     ],
@@ -289,7 +289,7 @@ Deno.test("evalTableau:(N(0)∧∀i.(N(i)→N(s(i))))→N(s(s(i)))", () => {
   });
   const expected: Tableau = {
     nodes: [
-      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["NOT", ["EXISTS", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
       ["PRED", "F", ["VAR", "τ"]],
       ["TOP"],
     ],

@@ -31,7 +31,7 @@ export const showFormula = (f: Formula): string => {
       return `(${showFormula(f[1])}↔${showFormula(f[2])})`;
     case "FORALL":
       return `∀${showTerm(f[1])}.${showFormula(f[2])}`;
-    case "ANY":
+    case "EXISTS":
       return `∃${showTerm(f[1])}.${showFormula(f[2])}`;
   }
 };
