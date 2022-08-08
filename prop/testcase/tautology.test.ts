@@ -1,6 +1,6 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { evalBranch } from "./branch.ts";
-import { findTB } from "./find_tb.ts";
+import { evalBranch } from "../branch.ts";
+import { findTB } from "../find_tb.ts";
 import {
   absorptiveAndOr,
   absorptiveOrAnd,
@@ -30,7 +30,7 @@ import {
   simplificationRight,
   transitive,
 } from "./tautology.ts";
-import { PropFormula } from "./types.ts";
+import { PropFormula } from "../types.ts";
 
 const isValid = (f: PropFormula) =>
   findTB(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }), "TOP") === false;
