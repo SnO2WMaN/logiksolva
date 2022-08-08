@@ -4,7 +4,9 @@ import { parseFormula, showFormula } from "./formula.ts";
 import { PropFormula, PropInference } from "./types.ts";
 
 export const showInference = (i: PropInference): string => {
-  return `${i.premise.map((f) => showFormula(f)).join(",")}⊨${showFormula(i.consequence)}`;
+  const pr = i.premise.map((f) => showFormula(f)).join(", ");
+  const cq = showFormula(i.consequence);
+  return `${pr}⊨ ${cq}`;
 };
 
 export const parseInference = (s: string): PropInference | null => {
