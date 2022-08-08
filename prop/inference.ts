@@ -1,7 +1,7 @@
 import { Branch, evalBranch } from "./branch.ts";
 import { findTB } from "./find_tb.ts";
 import { show } from "./mod.ts";
-import { parseFormula } from "./parser.ts";
+import { parseFormula } from "./formula.ts";
 import { PropFormula, PropInference } from "./types.ts";
 
 export const showInference = (i: PropInference): string => {
