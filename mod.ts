@@ -1,10 +1,7 @@
 import { oakCors } from "cors/mod.ts";
 import { Application, Router } from "oak/mod.ts";
 import { Logger } from "./logger.ts";
-import { evalBranch } from "./prop/branch.ts";
-import { findTB } from "./prop/find_tb.ts";
-import { parseFormula } from "./prop/parser.ts";
-import { show } from "./prop/show.ts";
+import { evalBranch, findTB, parseFormula, show } from "./prop/mod.ts";
 
 const app = new Application();
 const router = new Router();
