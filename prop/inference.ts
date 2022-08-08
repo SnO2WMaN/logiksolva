@@ -1,11 +1,10 @@
 import { Branch, evalBranch } from "./branch.ts";
 import { findTB } from "./find_tb.ts";
-import { show } from "./mod.ts";
-import { parseFormula } from "./formula.ts";
+import { parseFormula, showFormula } from "./formula.ts";
 import { PropFormula, PropInference } from "./types.ts";
 
 export const showInference = (i: PropInference): string => {
-  return `${i.premise.map((f) => show(f)).join(",")}⊨${show(i.consequence)}`;
+  return `${i.premise.map((f) => showFormula(f)).join(",")}⊨${showFormula(i.consequence)}`;
 };
 
 export const parseInference = (s: string): PropInference | null => {
