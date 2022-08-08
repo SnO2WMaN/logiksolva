@@ -262,3 +262,39 @@ Deno.test("evalTableau:¬∃x.F(x)", () => {
   };
   assertEquals(actual, expected);
 });
+
+Deno.test("evalTableau:(N(0)∧∀i.(N(i)→N(s(i))))→N(s(s(i)))", () => {
+  const actual = evalTableau({
+    nodes: [],
+    stack: [
+      [
+        "IMP",
+        [
+          "AND",
+          ["PRED", "N", ["VAR", "0"]],
+          [
+            "FORALL",
+            ["VAR", "i"],
+            [
+              "IMP",
+              ["PRED", "N", ["VAR", "i"]],
+              ["PRED", "N", ["OP", "s", ["VAR", "i"]]],
+            ],
+          ],
+        ],
+        ["PRED", "S", ["OP", "s", ["OP", "s", ["VAR", "i"]]]],
+      ],
+    ],
+    junction: null,
+  });
+  const expected: Tableau = {
+    nodes: [
+      ["NOT", ["ANY", ["VAR", "x"], ["PRED", "F", ["VAR", "x"]]]],
+      ["PRED", "F", ["VAR", "τ"]],
+      ["TOP"],
+    ],
+    stack: [],
+    junction: null,
+  };
+  assertEquals(actual, expected);
+});
