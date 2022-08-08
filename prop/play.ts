@@ -1,9 +1,9 @@
 import { green, red } from "https://deno.land/std@0.118.0/fmt/colors.ts";
 import { bold } from "std/fmt/colors.ts";
 import { evalBranch } from "./branch.ts";
-import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
+import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./example/fallancy.ts";
 import { findTB } from "./find_tb.ts";
-import { show } from "./show.ts";
+import { showFormula as show } from "./formula.ts";
 import {
   absorptiveAndOr,
   absorptiveOrAnd,
@@ -32,7 +32,7 @@ import {
   simplificationLeft,
   simplificationRight,
   transitive,
-} from "./tautology.ts";
+} from "./example/tautology.ts";
 import { PropFormula } from "./types.ts";
 
 const isValid = (f: PropFormula) =>
