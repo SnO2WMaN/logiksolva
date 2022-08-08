@@ -1,8 +1,8 @@
 import { assertEquals } from "std/testing/asserts.ts";
-import { evalBranch } from "./branch.ts";
+import { evalBranch } from "../branch.ts";
+import { findTB } from "../find_tb.ts";
+import { PropFormula } from "../types.ts";
 import { affirmingConsequent, affirmingDisjunct, denyingAntecedent, fallancyFallancy } from "./fallancy.ts";
-import { findTB } from "./find_tb.ts";
-import { PropFormula } from "./types.ts";
 
 const isNotValid = (f: PropFormula) =>
   (findTB(evalBranch({ stack: [["NOT", f]], nodes: [], skip: [], props: {}, junction: null }), "TOP")) === true;

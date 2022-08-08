@@ -8,3 +8,8 @@ export type Imp = ["IMP", PropFormula, PropFormula];
 export type Eq = ["EQ", PropFormula, PropFormula];
 
 export type PropFormula = Top | Bot | Prop | Not | And | Or | Imp | Eq;
+
+export type PropInference = {
+  premise: PropFormula[];
+  consequence: PropFormula;
+};

@@ -7,6 +7,27 @@
 
 import { PropFormula } from "./types.ts";
 
+export const showFormula = (f: PropFormula): string => {
+  switch (f[0]) {
+    case "TOP":
+      return "⊤";
+    case "BOT":
+      return "⊥";
+    case "PROP":
+      return f[1];
+    case "NOT":
+      return `¬${showFormula(f[1])}`;
+    case "AND":
+      return `(${showFormula(f[1])}∧${showFormula(f[2])})`;
+    case "OR":
+      return `(${showFormula(f[1])}∨${showFormula(f[2])})`;
+    case "IMP":
+      return `(${showFormula(f[1])}→${showFormula(f[2])})`;
+    case "EQ":
+      return `(${showFormula(f[1])}↔${showFormula(f[2])})`;
+  }
+};
+
 export const parsePr = (f: string): PropFormula | null => {
   const top = /^⊤$/.exec(f);
   if (top) return ["TOP"];
