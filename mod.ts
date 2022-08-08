@@ -1,7 +1,11 @@
 import { oakCors } from "cors/mod.ts";
 import { Application, Router } from "oak/mod.ts";
 import { Logger } from "./logger.ts";
-import { evalBranch, findTB, parseFormula, show } from "./prop/mod.ts";
+import {
+  checkInference as checkPropInference,
+  parseInference as parsePropInference,
+  showInference as showPropInference,
+} from "./prop/mod.ts";
 
 const app = new Application();
 const router = new Router();
@@ -23,23 +27,22 @@ router.get("/solve", ({ request, response }) => {
 
   switch (reqLogic) {
     case "prop": {
-      const reqFormula = request.url.searchParams.get("formula");
-      if (reqFormula === null) {
+      const reqInference = request.url.searchParams.get("inference");
+      if (reqInference === null) {
         response.status = 400;
-        Logger.debug(`?formula is missing for prop logic.`);
+        Logger.debug(`?inference is missing for prop logic.`);
         return;
       }
-      const formula = parseFormula(reqFormula);
-      if (formula === null) {
+      const inference = parsePropInference(reqInference);
+      if (inference === null) {
         response.status = 400;
-        Logger.debug(`"${reqFormula}" is not correct form formula in prop logic.`);
+        Logger.debug(`"${reqInference}" is not correct form inference in prop logic.`);
         return;
       }
-      const branch = evalBranch({ stack: [["NOT", formula]], nodes: [], skip: [], props: {}, junction: null });
-      const valid = findTB(branch, "TOP") === false;
-      Logger.debug(`"${show(formula)}" is ${valid ? "valid" : "invalid"} in prop logic.`);
+      const { branch, valid } = checkPropInference(inference);
+      Logger.debug(`"${showPropInference(inference)}" is ${valid ? "valid" : "invalid"} in prop logic.`);
 
-      response.body = { formula, branch, valid };
+      response.body = { inference, branch, valid };
       return;
     }
   }
