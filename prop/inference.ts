@@ -6,7 +6,7 @@ import { PropFormula, PropInference } from "./types.ts";
 export const showInference = (i: PropInference): string => {
   const pr = i.premise.map((f) => showFormula(f)).join(", ");
   const cq = showFormula(i.consequence);
-  return `${pr}⊨ ${cq}`;
+  return `${pr}${0 < i.premise.length ? " " : ""}⊨ ${cq}`;
 };
 
 export const parseInference = (s: string): PropInference | null => {
