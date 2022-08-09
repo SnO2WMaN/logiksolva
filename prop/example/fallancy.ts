@@ -1,4 +1,4 @@
-import { PropFormula } from "./types.ts";
+import { PropFormula } from "../types.ts";
 
 // 後件肯定
 // ⊭ ((Φ → Ψ) ∧ Ψ) → Φ

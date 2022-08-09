@@ -1,4 +1,4 @@
-import { PropFormula } from "./types.ts";
+import { PropFormula } from "../types.ts";
 
 // 結合律
 // ⊨ (Φ ∧ Ψ) ∧ χ ↔ Φ ∧ (Ψ ∧ χ)

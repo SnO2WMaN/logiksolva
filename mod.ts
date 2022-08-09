@@ -1,34 +1,50 @@
 import { oakCors } from "cors/mod.ts";
 import { Application, Router } from "oak/mod.ts";
 import { Logger } from "./logger.ts";
-import { evalBranch } from "./prop/branch.ts";
-import { findTB } from "./prop/find_tb.ts";
-import { parseFormula } from "./prop/parser.ts";
-import { show } from "./prop/show.ts";
+import {
+  checkInference as checkPropInference,
+  parseInference as parsePropInference,
+  showInference as showPropInference,
+} from "./prop/mod.ts";
 
 const app = new Application();
 const router = new Router();
 
-router.get("/solve", ({ request, response }) => {
-  const reqFormula = request.url.searchParams.get("formula");
-  if (reqFormula === null) {
-    response.status = 400;
-    Logger.debug(`/solve formula is missing`);
-    return;
-  }
-  const formula = parseFormula(reqFormula);
-  if (formula === null) {
-    response.status = 400;
-    Logger.debug(`/solve ${formula} cannot be parsed.`);
-    return;
-  }
-  Logger.debug(`/solve given formula is ${show(formula)}`);
-  const branch = evalBranch({ stack: [["NOT", formula]], nodes: [], skip: [], props: {}, junction: null });
-  const valid = findTB(branch, "TOP") === false;
-  Logger.debug(`/solve ${show(formula)} is ${valid ? "valid" : "invalid"}`);
+export type LogicType = "prop";
+export const isLogicType = (type: string): type is LogicType => ["prop"].includes(type);
 
-  response.body = { formula, branch, valid };
-  return;
+router.get("/solve", ({ request, response }) => {
+  const reqLogic = request.url.searchParams.get("logic");
+  if (!reqLogic) {
+    response.status = 400;
+    Logger.debug(`?logic is missing.`);
+    return;
+  } else if (!isLogicType(reqLogic)) {
+    response.status = 400;
+    Logger.debug(`?logic must be "prop" but given is "${reqLogic}".`);
+    return;
+  }
+
+  switch (reqLogic) {
+    case "prop": {
+      const reqInference = request.url.searchParams.get("inference");
+      if (reqInference === null) {
+        response.status = 400;
+        Logger.debug(`?inference is missing for prop logic.`);
+        return;
+      }
+      const inference = parsePropInference(reqInference);
+      if (inference === null) {
+        response.status = 400;
+        Logger.debug(`"${reqInference}" is not correct form inference in prop logic.`);
+        return;
+      }
+      const { tableau, valid } = checkPropInference(inference);
+      Logger.debug(`"${showPropInference(inference)}" is ${valid ? "valid" : "invalid"} in prop logic.`);
+      response.body = { type: "prop", inference, tableau, valid };
+      return;
+    }
+  }
 });
 app.use(router.routes());
 app.use(router.allowedMethods());
