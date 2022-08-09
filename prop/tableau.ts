@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "std/node/util.ts";
-import { And, Eq, Imp, Not, Or, PropFormula } from "./types.ts";
+import { And, Eq, Imp, Not, Or, Prop, PropFormula } from "./types.ts";
 
 export type Tableau = {
   nodes: PropFormula[];
@@ -72,12 +72,16 @@ export const evalTableau = (t: Tableau): Tableau => {
   return t;
 };
 
-export const evalAnd = (t: Tableau, head: And, rest: PropFormula[]): Tableau =>
-  evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1], head[2]] });
+export const evalAnd = (t: Tableau, head: And, rest: PropFormula[], a?: PropFormula): Tableau =>
+  evalTableau({
+    ...t,
+    nodes: a ? [...t.nodes, a, head] : [...t.nodes, head],
+    stack: [...rest, head[1], head[2]],
+  });
 
-export const evalOr = (t: Tableau, head: Or, rest: PropFormula[]): Tableau => ({
+export const evalOr = (t: Tableau, head: Or, rest: PropFormula[], a?: PropFormula): Tableau => ({
   ...t,
-  nodes: [...t.nodes, head],
+  nodes: a ? [...t.nodes, a, head] : [...t.nodes, head],
   stack: rest,
   junction: [
     evalTableau({ nodes: [], stack: [...rest, head[1]], prev: [...t.prev, ...t.nodes, head], junction: null }),
@@ -86,10 +90,10 @@ export const evalOr = (t: Tableau, head: Or, rest: PropFormula[]): Tableau => ({
 });
 
 export const evalImp = (t: Tableau, head: Imp, rest: PropFormula[]): Tableau =>
-  evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest);
+  evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest, head);
 
 export const evalEq = (t: Tableau, head: Eq, rest: PropFormula[]): Tableau =>
-  evalOr(t, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]], rest);
+  evalOr(t, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]], rest, head);
 
 export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]) => {
   switch (head[1][0]) {
@@ -102,16 +106,17 @@ export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]) => {
     case "NOT":
       return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1][1]] });
     case "AND":
-      return evalOr(t, ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest);
+      return evalOr(t, ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest, head);
     case "OR":
-      return evalAnd(t, ["AND", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest);
+      return evalAnd(t, ["AND", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest, head);
     case "IMP":
-      return evalAnd(t, ["AND", head[1][1], ["NOT", head[1][2]]], rest);
+      return evalAnd(t, ["AND", head[1][1], ["NOT", head[1][2]]], rest, head);
     case "EQ":
       return evalAnd(
         t,
         ["AND", ["OR", head[1][1], head[1][2]], ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]]],
         rest,
+        head,
       );
   }
 };
