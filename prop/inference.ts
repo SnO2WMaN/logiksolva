@@ -1,6 +1,5 @@
-import { Branch, evalBranch } from "./branch.ts";
-import { findTB } from "./find_tb.ts";
 import { parseFormula, showFormula } from "./formula.ts";
+import { evalTableau, hasTop, makeSlimTableau, SlimTableau } from "./tableau.ts";
 import { PropFormula, PropInference } from "./types.ts";
 
 export const showInference = (i: PropInference): string => {
@@ -27,14 +26,8 @@ export const parseInference = (s: string): PropInference | null => {
   };
 };
 
-export const checkInference = (i: PropInference): { branch: Branch; valid: boolean } => {
-  const branch = evalBranch({
-    stack: [...i.premise, ["NOT", i.consequence]],
-    nodes: [],
-    skip: [],
-    props: {},
-    junction: null,
-  });
-  const valid = findTB(branch, "TOP") === false;
-  return { branch, valid };
+export const checkInference = (i: PropInference): { tableau: SlimTableau; valid: boolean } => {
+  const tableau = evalTableau({ stack: [...i.premise, ["NOT", i.consequence]], nodes: [], junction: null, prev: [] });
+  const valid = hasTop(tableau) === false;
+  return { tableau: makeSlimTableau(tableau), valid };
 };

@@ -39,10 +39,9 @@ router.get("/solve", ({ request, response }) => {
         Logger.debug(`"${reqInference}" is not correct form inference in prop logic.`);
         return;
       }
-      const { branch, valid } = checkPropInference(inference);
+      const { tableau, valid } = checkPropInference(inference);
       Logger.debug(`"${showPropInference(inference)}" is ${valid ? "valid" : "invalid"} in prop logic.`);
-
-      response.body = { inference, branch, valid };
+      response.body = { inference, tableau, valid };
       return;
     }
   }
