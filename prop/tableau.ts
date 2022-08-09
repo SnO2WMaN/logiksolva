@@ -126,39 +126,6 @@ export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]): Tableau => 
   }
 };
 
-console.log(
-  !hasTop(evalTableau(
-    {
-      stack: [["NOT", ["IMP", ["AND", ["PROP", "P"], ["IMP", ["PROP", "P"], ["PROP", "Q"]]], ["PROP", "Q"]]]],
-      junction: null,
-      nodes: [],
-      prev: [],
-      skip: [],
-    },
-  )),
-);
-
-console.log(
-  !hasTop(evalTableau(
-    {
-      stack: [
-        [
-          "NOT",
-          [
-            "IMP",
-            ["AND", ["IMP", ["PROP", "P"], ["PROP", "R"]], ["IMP", ["PROP", "Q"], ["PROP", "R"]]],
-            ["IMP", ["OR", ["PROP", "P"], ["PROP", "Q"]], ["PROP", "R"]],
-          ],
-        ],
-      ],
-      junction: null,
-      nodes: [],
-      prev: [],
-      skip: [],
-    },
-  )),
-);
-
 export type SlimTableau = { nodes: PropFormula[]; junction: null | [SlimTableau, SlimTableau] };
 export const makeSlimTableau = ({ nodes, junction }: Tableau): SlimTableau => {
   if (junction !== null) return { nodes, junction: [makeSlimTableau(junction[0]), makeSlimTableau(junction[1])] };
