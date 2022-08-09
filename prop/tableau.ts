@@ -83,15 +83,15 @@ export const evalTableau = (t: Tableau): Tableau => {
   return t;
 };
 
-export const evalAnd = (t: Tableau, head: And, rest: PropFormula[], a?: PropFormula): Tableau =>
+export const evalAnd = (t: Tableau, head: And, rest: PropFormula[], as?: PropFormula): Tableau =>
   evalTableau({
     ...t,
-    nodes: a ? [...t.nodes, a, head] : [...t.nodes, head],
+    nodes: as ? [...t.nodes, as] : [...t.nodes, head],
     stack: [...rest, head[1], head[2]],
   });
 
-export const evalOr = (t: Tableau, head: Or, rest: PropFormula[], a?: PropFormula): Tableau =>
-  evalTableau({ ...t, nodes: a ? [...t.nodes, a, head] : [...t.nodes, head], stack: rest, skip: [...t.skip, head] });
+export const evalOr = (t: Tableau, head: Or, rest: PropFormula[], as?: PropFormula): Tableau =>
+  evalTableau({ ...t, nodes: as ? [...t.nodes, as] : [...t.nodes, head], stack: rest, skip: [...t.skip, head] });
 
 export const evalImp = (t: Tableau, head: Imp, rest: PropFormula[]): Tableau =>
   evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest, head);
