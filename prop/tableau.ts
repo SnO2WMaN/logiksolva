@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "std/node/util.ts";
-import { PropFormula } from "./types.ts";
+import { And, Eq, Imp, Not, Or, PropFormula } from "./types.ts";
 
 export type Tableau = {
   nodes: PropFormula[];
@@ -57,91 +57,63 @@ export const evalTableau = (t: Tableau): Tableau => {
       case "TOP":
       case "BOT":
         return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [] });
-      // deno-lint-ignore no-fallthrough
-      case "NOT": {
-        switch (head[1][0]) {
-          case "PROP":
-            return evalTableau({ ...t, nodes: [...t.nodes, head], stack: rest });
-          case "TOP":
-            return evalTableau({ ...t, nodes: [...t.nodes, head, ["BOT"]], stack: [] });
-          case "BOT":
-            return evalTableau({ ...t, nodes: [...t.nodes, head, ["TOP"]], stack: [] });
-          case "NOT":
-            return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1][1]] });
-          case "AND":
-            return evalTableau({
-              ...t,
-              nodes: [...t.nodes, head],
-              stack: [...rest, ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]]],
-            });
-          case "OR":
-            return evalTableau({
-              ...t,
-              nodes: [...t.nodes, head],
-              stack: [...rest, ["AND", ["NOT", head[1][1]], ["NOT", head[1][2]]]],
-            });
-          case "IMP":
-            return evalTableau({
-              ...t,
-              nodes: [...t.nodes, head],
-              stack: [...rest, ["AND", head[1][1], ["NOT", head[1][2]]]],
-            });
-          case "EQ":
-            return evalTableau({
-              ...t,
-              nodes: [...t.nodes, head],
-              stack: [
-                ...rest,
-                [
-                  "AND",
-                  ["OR", head[1][1], head[1][2]],
-                  ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]],
-                ],
-              ],
-            });
-        }
-      }
+      case "NOT":
+        return evalNot(t, head, rest);
       case "AND":
-        return evalTableau({
-          ...t,
-          nodes: [...t.nodes, head],
-          stack: [...rest, head[1], head[2]],
-        });
+        return evalAnd(t, head, rest);
       case "OR":
-        return ({
-          ...t,
-          nodes: [...t.nodes, head],
-          stack: rest,
-          junction: [
-            evalTableau({
-              nodes: [],
-              stack: [...rest, head[1]],
-              prev: [...t.prev, ...t.nodes, head],
-              junction: null,
-            }),
-            evalTableau({
-              nodes: [],
-              stack: [...rest, head[2]],
-              prev: [...t.prev, ...t.nodes, head],
-              junction: null,
-            }),
-          ],
-        });
+        return evalOr(t, head, rest);
       case "IMP":
-        return evalTableau({
-          ...t,
-          nodes: [...t.nodes, head],
-          stack: [...rest, ["OR", ["NOT", head[1]], head[2]]],
-        });
+        return evalImp(t, head, rest);
       case "EQ":
-        return evalTableau({
-          ...t,
-          nodes: [...t.nodes, head],
-          stack: [...rest, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]]],
-        });
+        return evalEq(t, head, rest);
     }
   }
   return t;
+};
+
+export const evalAnd = (t: Tableau, head: And, rest: PropFormula[]): Tableau =>
+  evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1], head[2]] });
+
+export const evalOr = (t: Tableau, head: Or, rest: PropFormula[]): Tableau => ({
+  ...t,
+  nodes: [...t.nodes, head],
+  stack: rest,
+  junction: [
+    evalTableau({ nodes: [], stack: [...rest, head[1]], prev: [...t.prev, ...t.nodes, head], junction: null }),
+    evalTableau({ nodes: [], stack: [...rest, head[2]], prev: [...t.prev, ...t.nodes, head], junction: null }),
+  ],
+});
+
+export const evalImp = (t: Tableau, head: Imp, rest: PropFormula[]): Tableau =>
+  evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest);
+
+export const evalEq = (t: Tableau, head: Eq, rest: PropFormula[]): Tableau =>
+  evalOr(t, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]], rest);
+
+export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]) => {
+  switch (head[1][0]) {
+    case "PROP":
+      return evalTableau({ ...t, nodes: [...t.nodes, head], stack: rest });
+    case "TOP":
+      return evalTableau({ ...t, nodes: [...t.nodes, head, ["BOT"]], stack: [] });
+    case "BOT":
+      return evalTableau({ ...t, nodes: [...t.nodes, head, ["TOP"]], stack: [] });
+    case "NOT":
+      return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1][1]] });
+    case "AND":
+      return evalOr(t, ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest);
+    case "OR":
+      return evalAnd(t, ["AND", ["NOT", head[1][1]], ["NOT", head[1][2]]], rest);
+    case "IMP":
+      return evalAnd(t, ["AND", head[1][1], ["NOT", head[1][2]]], rest);
+    case "EQ":
+      return evalAnd(
+        t,
+        ["AND", ["OR", head[1][1], head[1][2]], ["OR", ["NOT", head[1][1]], ["NOT", head[1][2]]]],
+        rest,
+      );
+  }
 };
 
 console.log(
