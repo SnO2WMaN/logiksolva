@@ -12,17 +12,18 @@ export type Tableau = {
 };
 
 export const isSameFormula = (f1: PropFormula, f2: PropFormula): boolean => {
-  return isDeepStrictEqual(f1, f2);
-  // if (f1[0] !== f2[0]) return false;
-  // switch (f1[0]) {
-  //   case "AND":
-  //   case "OR":
-  //   case "EQ":
-  //     return (isSameFormula(f1[1], (f2 as And | Or | Eq)[1]) && isSameFormula(f1[2], (f2 as And | Or | Eq)[2])) ||
-  //       (isSameFormula(f1[1], (f2 as And | Or | Eq)[2]) && isSameFormula(f1[2], (f2 as And | Or | Eq)[1]));
-  //   default:
-  //     return isDeepStrictEqual(f1, f2);
-  // }
+  if (
+    (f1[0] === "AND" && f2[0] === "AND") ||
+    (f1[0] === "OR" && f2[0] === "OR") ||
+    (f1[0] === "EQ" && f2[0] === "EQ")
+  ) {
+    return (isSameFormula(f1[1], f2[1]) && isSameFormula(f1[2], f2[2])) ||
+      (isSameFormula(f1[1], f2[2]) && isSameFormula(f1[2], f2[1]));
+  } /* ¬¬f1 = f1として再評価 */
+  else if (f1[0] === "NOT" && f1[1][0] === "NOT") return isSameFormula(f1[1][1], f2);
+  /* ¬¬f2 = f2として再評価 */
+  else if (f2[0] === "NOT" && f2[1][0] === "NOT") return isSameFormula(f1, f2[1][1]);
+  else return isDeepStrictEqual(f1, f2);
 };
 
 export const hasContract = (list: PropFormula[], check: PropFormula[]): boolean => {
