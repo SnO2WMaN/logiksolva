@@ -79,9 +79,9 @@ export const evalTableau = (t: Tableau): Tableau => {
         evalTableau({ nodes: [], stack: [head[2]], skip: rest, prev: [...t.prev, ...t.nodes, head], junction: null }),
       ],
     });
+  } else {
+    return ({ ...t, nodes: [...t.nodes, ["TOP"]] });
   }
-
-  return t;
 };
 
 export const evalAnd = (t: Tableau, head: And, rest: PropFormula[], as?: PropFormula): Tableau =>
