@@ -8,6 +8,7 @@ export type Tableau = {
   // props: PropsTable;
   junction: null | [Tableau, Tableau];
   prev: PropFormula[];
+  skip: Or[];
 };
 
 export const isSameFormula = (f1: PropFormula, f2: PropFormula): boolean => {
@@ -68,7 +69,17 @@ export const evalTableau = (t: Tableau): Tableau => {
       case "EQ":
         return evalEq(t, head, rest);
     }
+  } else if (0 < t.skip.length) {
+    const [head, ...rest] = t.skip;
+    return ({
+      ...t,
+      junction: [
+        evalTableau({ nodes: [], stack: [head[1]], skip: rest, prev: [...t.prev, ...t.nodes, head], junction: null }),
+        evalTableau({ nodes: [], stack: [head[2]], skip: rest, prev: [...t.prev, ...t.nodes, head], junction: null }),
+      ],
+    });
   }
+
   return t;
 };
 
@@ -79,15 +90,8 @@ export const evalAnd = (t: Tableau, head: And, rest: PropFormula[], a?: PropForm
     stack: [...rest, head[1], head[2]],
   });
 
-export const evalOr = (t: Tableau, head: Or, rest: PropFormula[], a?: PropFormula): Tableau => ({
-  ...t,
-  nodes: a ? [...t.nodes, a, head] : [...t.nodes, head],
-  stack: rest,
-  junction: [
-    evalTableau({ nodes: [], stack: [...rest, head[1]], prev: [...t.prev, ...t.nodes, head], junction: null }),
-    evalTableau({ nodes: [], stack: [...rest, head[2]], prev: [...t.prev, ...t.nodes, head], junction: null }),
-  ],
-});
+export const evalOr = (t: Tableau, head: Or, rest: PropFormula[], a?: PropFormula): Tableau =>
+  evalTableau({ ...t, nodes: a ? [...t.nodes, a, head] : [...t.nodes, head], stack: rest, skip: [...t.skip, head] });
 
 export const evalImp = (t: Tableau, head: Imp, rest: PropFormula[]): Tableau =>
   evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest, head);
@@ -128,6 +132,7 @@ console.log(
       junction: null,
       nodes: [],
       prev: [],
+      skip: [],
     },
   )),
 );
@@ -148,6 +153,7 @@ console.log(
       junction: null,
       nodes: [],
       prev: [],
+      skip: [],
     },
   )),
 );

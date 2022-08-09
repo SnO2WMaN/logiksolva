@@ -27,7 +27,13 @@ export const parseInference = (s: string): PropInference | null => {
 };
 
 export const checkInference = (i: PropInference): { tableau: SlimTableau; valid: boolean } => {
-  const tableau = evalTableau({ stack: [...i.premise, ["NOT", i.consequence]], nodes: [], junction: null, prev: [] });
+  const tableau = evalTableau({
+    stack: [...i.premise, ["NOT", i.consequence]],
+    nodes: [],
+    junction: null,
+    prev: [],
+    skip: [],
+  });
   const valid = hasTop(tableau) === false;
   return { tableau: makeSlimTableau(tableau), valid };
 };
