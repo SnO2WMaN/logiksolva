@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "std/node/util.ts";
-import { And, Eq, Imp, Not, Or, Prop, PropFormula } from "./types.ts";
+import { And, Eq, Imp, Not, Or, PropFormula } from "./types.ts";
 
 export type Tableau = {
   nodes: PropFormula[];
@@ -58,7 +58,7 @@ export const evalTableau = (t: Tableau): Tableau => {
         return evalTableau({ ...t, nodes: [...t.nodes, head], stack: rest });
       case "TOP":
       case "BOT":
-        return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [] });
+        return { ...t, nodes: [...t.nodes, head], stack: [] };
       case "NOT":
         return evalNot(t, head, rest);
       case "AND":
@@ -100,14 +100,14 @@ export const evalImp = (t: Tableau, head: Imp, rest: PropFormula[]): Tableau =>
 export const evalEq = (t: Tableau, head: Eq, rest: PropFormula[]): Tableau =>
   evalOr(t, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]], rest, head);
 
-export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]) => {
+export const evalNot = (t: Tableau, head: Not, rest: PropFormula[]): Tableau => {
   switch (head[1][0]) {
     case "PROP":
       return evalTableau({ ...t, nodes: [...t.nodes, head], stack: rest });
     case "TOP":
-      return evalTableau({ ...t, nodes: [...t.nodes, head, ["BOT"]], stack: [] });
+      return ({ ...t, nodes: [...t.nodes, head, ["BOT"]], stack: [] });
     case "BOT":
-      return evalTableau({ ...t, nodes: [...t.nodes, head, ["TOP"]], stack: [] });
+      return ({ ...t, nodes: [...t.nodes, head, ["TOP"]], stack: [] });
     case "NOT":
       return evalTableau({ ...t, nodes: [...t.nodes, head], stack: [...rest, head[1][1]] });
     case "AND":
