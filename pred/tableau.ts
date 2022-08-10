@@ -1,22 +1,35 @@
 import { isDeepStrictEqual } from "std/node/util.ts";
 import { showFormula } from "./show.ts";
-import { And, Eq, Exists, ForAll, Formula, Imp, Not, NotPredicate, Or, Predicate, Term, Variable } from "./types.ts";
-import { getFreeVariablesFromFormula, substituteToFormula } from "./variables.ts";
+import {
+  And,
+  Eq,
+  Exists,
+  ForAll,
+  Imp,
+  Not,
+  NotPredicate,
+  Or,
+  PredFormula,
+  Predicate,
+  Term,
+  Variable,
+} from "./types.ts";
+import { getFreeVariablesFromFormula } from "./variables.ts";
 
 export type Tableau = {
-  nodes: Formula[];
-  stack: Formula[];
+  nodes: PredFormula[];
+  stack: PredFormula[];
   junction: null | [Tableau, Tableau];
-  prev: [] | Formula[];
+  prev: [] | PredFormula[];
   ps: (Predicate | NotPredicate)[];
   qs: (ForAll | Exists)[];
 };
 
 // TODO: ∧, ∨の順序を考慮した同一性チェック
-export const isSameFormula = (f1: Formula, f2: Formula): boolean => isDeepStrictEqual(f1, f2);
+export const isSameFormula = (f1: PredFormula, f2: PredFormula): boolean => isDeepStrictEqual(f1, f2);
 
 // fsの中の論理式φに存在する適当な項，存在しないならτ
-export const makeAnyVariable = (fs: Formula[]): Term => {
+export const makeAnyVariable = (fs: PredFormula[]): Term => {
   if (fs.length === 0) return ["VAR", "τ"];
   const [headFormula, ...restFormulas] = fs;
   switch (headFormula[0]) {
@@ -39,7 +52,7 @@ export const makeAnyVariable = (fs: Formula[]): Term => {
 };
 
 // fsの中の論理式φについてζ∉fv(φ)なζを生成
-export const makeUniqueVariable = (fs: Formula[]): Variable => {
+export const makeUniqueVariable = (fs: PredFormula[]): Variable => {
   const next = fs
     .map((f) => getFreeVariablesFromFormula(f))
     .reduce((p, c) => [...p, ...c], [])
@@ -92,7 +105,7 @@ export const evalTableau = (t: Tableau): Tableau => {
   return t;
 };
 
-export const evalNot = (t: Tableau, head: Not, rest: Formula[]): Tableau => {
+export const evalNot = (t: Tableau, head: Not, rest: PredFormula[]): Tableau => {
   switch (head[1][0]) {
     case "PRED":
       return evalTableau({ nodes: [...t.nodes, head], stack: [...rest], junction: null, prev: [] });
@@ -133,7 +146,7 @@ export const evalNot = (t: Tableau, head: Not, rest: Formula[]): Tableau => {
   }
 };
 
-export const evalAnd = (t: Tableau, head: And, rest: Formula[]): Tableau =>
+export const evalAnd = (t: Tableau, head: And, rest: PredFormula[]): Tableau =>
   evalTableau({
     nodes: [...t.nodes, head],
     stack: [...rest, head[1], head[2]],
@@ -141,7 +154,7 @@ export const evalAnd = (t: Tableau, head: And, rest: Formula[]): Tableau =>
     prev: [],
   });
 
-export const evalOr = (t: Tableau, head: Or, rest: Formula[]): Tableau =>
+export const evalOr = (t: Tableau, head: Or, rest: PredFormula[]): Tableau =>
   evalTableau({
     nodes: [...t.nodes, head],
     stack: [...rest],
@@ -152,10 +165,10 @@ export const evalOr = (t: Tableau, head: Or, rest: Formula[]): Tableau =>
     prev: [],
   });
 
-export const evalImp = (t: Tableau, head: Imp, rest: Formula[]): Tableau =>
+export const evalImp = (t: Tableau, head: Imp, rest: PredFormula[]): Tableau =>
   evalOr(t, ["OR", ["NOT", head[1]], head[2]], rest);
 
-export const evalEq = (t: Tableau, head: Eq, rest: Formula[]): Tableau =>
+export const evalEq = (t: Tableau, head: Eq, rest: PredFormula[]): Tableau =>
   evalOr(t, ["OR", ["AND", head[1], head[2]], ["AND", ["NOT", head[1]], ["NOT", head[2]]]], rest);
 
 console.log(showFormula([

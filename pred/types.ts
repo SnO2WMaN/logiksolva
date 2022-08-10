@@ -15,21 +15,21 @@ export type Predicate = ["PRED", string, Term];
 // 真理関数
 export type Top = ["TOP"];
 export type Bot = ["BOT"];
-export type Not = ["NOT", Formula];
-export type And = ["AND", Formula, Formula];
-export type Or = ["OR", Formula, Formula];
-export type Imp = ["IMP", Formula, Formula];
-export type Eq = ["EQ", Formula, Formula];
+export type Not = ["NOT", PredFormula];
+export type And = ["AND", PredFormula, PredFormula];
+export type Or = ["OR", PredFormula, PredFormula];
+export type Imp = ["IMP", PredFormula, PredFormula];
+export type Eq = ["EQ", PredFormula, PredFormula];
 
 // 特殊ケース
 export type NotPredicate = ["NOT", Predicate];
 
 // 量化子
-export type ForAll = ["FORALL", Variable, Formula];
-export type Exists = ["EXISTS", Variable, Formula];
+export type ForAll = ["FORALL", Variable, PredFormula];
+export type Exists = ["EXISTS", Variable, PredFormula];
 
 // 項
 export type Term = Name | Variable | Operator;
 
 // 論理式
-export type Formula = Predicate | Top | Bot | Not | And | Or | Imp | Eq | ForAll | Exists;
+export type PredFormula = Predicate | Top | Bot | Not | And | Or | Imp | Eq | ForAll | Exists;

@@ -1,4 +1,4 @@
-import { Formula, Term } from "./types.ts";
+import { PredFormula, Term } from "./types.ts";
 
 export const showTerm = (t: Term): string => {
   switch (t[0]) {
@@ -11,7 +11,7 @@ export const showTerm = (t: Term): string => {
   }
 };
 
-export const showFormula = (f: Formula): string => {
+export const showFormula = (f: PredFormula): string => {
   switch (f[0]) {
     case "PRED":
       return `${f[1]}(${showTerm(f[2])})`;

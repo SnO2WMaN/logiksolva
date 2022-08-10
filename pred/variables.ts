@@ -1,4 +1,4 @@
-import { Formula, Term, Variable } from "./types.ts";
+import { PredFormula, Term, Variable } from "./types.ts";
 
 export const uniqVariables = (vs: Variable[]): Variable[] =>
   // O(n^2)だが変項は高々10個以内と想定されるので良しとする
@@ -15,7 +15,7 @@ export const getFreeVariablesFromTerm = (t: Term): Variable[] => {
   }
 };
 
-export const getFreeVariablesFromFormula = (f: Formula): Variable[] => {
+export const getFreeVariablesFromFormula = (f: PredFormula): Variable[] => {
   switch (f[0]) {
     case "PRED":
       return uniqVariables([...getFreeVariablesFromTerm(f[2])]);
@@ -37,7 +37,7 @@ export const getFreeVariablesFromFormula = (f: Formula): Variable[] => {
 };
 
 export const getBoundVariablesFromTerm = (_: Term): Variable[] => [];
-export const getBoundVariablesFromFormula = (f: Formula): Variable[] => {
+export const getBoundVariablesFromFormula = (f: PredFormula): Variable[] => {
   switch (f[0]) {
     case "PRED":
       return [];
@@ -70,7 +70,7 @@ export const substituteToTerm = (t: Term, from: Variable, to: Term): Term => {
   }
 };
 
-export const substituteToFormula = (f: Formula, from: Variable, to: Term): Formula => {
+export const substituteToFormula = (f: PredFormula, from: Variable, to: Term): PredFormula => {
   switch (f[0]) {
     case "PRED":
       return ["PRED", f[1], substituteToTerm(f[2], from, to)];
